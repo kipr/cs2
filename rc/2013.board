@@ -1,0 +1,42 @@
+set-units in
+
+pen white 1
+brush white
+
+set-z -1.0
+
+# Board
+
+dec-rect 0 0 95.75 95.75 
+
+pen black 2
+brush transparent
+
+set-z 1.0
+
+# Outline
+line 0 0 0 95.75
+line 0 95.75 95.75 95.75
+line 95.75 95.75 95.75 0
+line 95.75 0 0 0
+
+line 21.75 21.75 21.75 73.75
+line 74 21.75 74 73.75
+
+line 21.75 46.75 74 46.75
+
+pen gainsboro 1
+
+# Overpass
+dec-line 21.75 21.75 0 21.75
+dec-line 74 21.75 74 0
+dec-line 74 74 95.75 74
+dec-line 21.75 74 21.75 95.75
+
+pen black 3
+set-z -1.0
+
+tape 9 9 84.75 9
+tape 9 9 9 84.75
+tape 9 84.75 84.75 84.75
+tape 84.75 9 84.75 84.75

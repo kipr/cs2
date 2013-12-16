@@ -1,0 +1,78 @@
+\documentclass{article}
+
+\usepackage{syntax}
+
+\begin{document}
+  \title{\texttt{ks2} Board File Specification}
+  \author{KISS Institute for Practical Robotics}
+  \maketitle
+  
+  
+  \section{Introduction}
+  \texttt{ks2} supports a simple ``board'' file format
+  that allows customization of the simulation environment.
+  
+  All commands follow a similar whitespace-delimited format:
+  
+  \begin{grammar}
+    <command> ::= <function> <param1> <param2> ...
+  \end{grammar}
+  
+  Some commands draw \emph{objects} in the environment, while
+  others mutate the board file's \emph{state}.
+  
+  For the remainder of this document, commands and their typed parameters will be bolded. For example, the statement \textbf{a b:string c:real} means that a function \emph{a} takes two parameters -- \emph{b} of type string and \emph{c} of type real.
+  If a command is $ \equiv $ (equivalent) to another command,
+  this means that the parameters and drawing function of the
+  commands are identical.
+  
+  Any line that begins with `\#' in a board file is ignored.
+  
+  \section{Drawing Commands}
+  
+  Drawing commands create objects (lines, rectangles, etc.) in the environment. Different syntax is used for objects with different physical properties but identical drawing.
+  
+  \subsection{Walls}
+  
+  Walls are the simplest type of drawn object. Walls will
+  effect simulated range sensors and touch sensors.
+  Currently, there is no robot collision detection with walls.
+  
+  \begin{itemize}
+    \item \textbf{line $x_1$:real $y_1$:real $x_2$:real $y_2$:real} --- The line command draws a line in the environment
+    from point $(x_1, y_1)$ to $(x_2, y_2)$.
+  \end{itemize}
+  
+  \subsection{Decorative}
+  
+  Decorative objects do not effect any sensor on a robot.
+  They only serve as visual hints to the user.
+  
+  \begin{itemize}
+    \item \textbf{dec-line} $\equiv$ \textbf{line}
+    \item \textbf{dec-rect $x$:real $y$:real $w$:real $h$:real} --- Draws a rectangle starting at $(x, y)$ with the width $w$ and the height $h$
+  \end{itemize}
+  
+  \subsection{Tape}
+  
+  Tape is a special type of object that can be detected by
+  analog reflectance sensors.
+  
+  \begin{itemize}
+    \item \textbf{tape} $ \equiv $ \textbf{line}
+  \end{itemize}
+  
+  \section{State Commands}
+  
+  State commands effect the subsequent drawing commands that appear in a board file. For example, one could set the color of all subsequent lines to purple, draw several lines, then change the color again.
+  
+  \begin{itemize}
+    \item \textbf{pen $c$:color $width$:real} --- Sets the current drawing ``pen'', which is roughly equivalent to the outline of an object. The color $c$ can be a color name, color hex code, or even a CSS-style rgb tuple. The $width$ is the drawn outline width.
+    \item \textbf{brush $c$:color} --- Sets the current drawing ``brush'', which is roughly equivalent to the color fill of an object. As with ``pen'', the color can be a multitude of different values.
+    \item \textbf{set-units $u$:string} --- Sets the units of any subsequent real number. The string $u$ can be either ``in'' or ``cm'' (without quotes).
+    \item \textbf{set-z $z$:real} --- Sets the current drawing depth. For example, objects drawn at a $z$ of $-1.0$ will appear
+    above objects drawn at a $z$ of $1.0$. This allows fine-grained control of object layering.
+  \end{itemize}
+  
+  
+\end{document}
