@@ -187,6 +187,13 @@ void MainWindow::setState(const State state)
   ui->sim->setVisible(state == MainWindow::Simulator);
   ui->console->setVisible(state == MainWindow::Computer);
   ui->simControls->setVisible(state == MainWindow::Simulator);
+  ui->actionZoomIn->setEnabled(state == MainWindow::Computer);
+  ui->actionZoomOut->setEnabled(state == MainWindow::Computer);
+  switch(_state) {
+    case MainWindow::Computer: setWindowTitle(tr("My Computer")); break;
+    case MainWindow::Simulator: setWindowTitle(tr("Link 2D Simulator")); break;
+  }
+  
 }
 
 MainWindow::State MainWindow::state() const
@@ -453,6 +460,19 @@ void MainWindow::run(const QString &executable, const QString &id)
 {
   stop();
   
+  qDebug() << "RUN";
+  
+  if(id == "computer") {
+    setState(MainWindow::Computer);
+  } else if(id == "simulator") {
+    setState(MainWindow::Simulator);
+  } else {
+    qWarning() << "Unknown id" << id;
+    return;
+  }
+  
+  qDebug() << "CREATE PROCESS";
+  
   m_process = new QProcess();
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
   // TODO: This will only work on OS X
@@ -482,14 +502,19 @@ void MainWindow::run(const QString &executable, const QString &id)
   m_process->setWorkingDirectory(_workingDirectory.path());
   connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished()));
 
-  qDebug() << "Started" << root.bin(executable).filePath(executable);
-
   m_process->start(root.bin(executable).filePath(executable), QStringList());
   _processOutputBuffer->setProcess(m_process);
   if(!m_process->waitForStarted(1000)) {
-    ui->console->append(tr("Failed to start %1").arg(executable));
+    const QString msg = tr("Failed to start %1").arg(executable);
+    ui->console->append(msg);
+    ui->linkConsole->append(msg);
+    qWarning() << msg;
     return;
   }
+  
+  qDebug() << "Started" << root.bin(executable).filePath(executable);
+  
+  processStarted();
 
   raise();
 }
@@ -516,7 +541,10 @@ void MainWindow::updateSettings()
   QColor textColor = settings.value(TEXT_COLOR).value<QColor>();
   QFont font = settings.value(FONT).value<QFont>();
   qreal fontSize = settings.value(FONT_SIZE).toInt();
+  
   ui->console->document()->setMaximumBlockCount(settings.value(MAXIMUM_SCROLLBACK, 100000).toInt());
+  ui->linkConsole->document()->setMaximumBlockCount(settings.value(MAXIMUM_SCROLLBACK, 100000).toInt());
+  
   settings.endGroup();
 
   updateAdvert();
@@ -546,9 +574,9 @@ void MainWindow::updateSettings()
   QDir prog(progPath);
   prog.makeAbsolute();
   if(!prog.exists()) QDir().mkpath(prog.absolutePath());
+  
   _simulatorServer->setUserRoot(prog.path());
   _computerServer->setUserRoot(prog.path());
-
   _archivesModel->setArchivesRoot(prog.absoluteFilePath("archives") + "/");
 
   settings.endGroup();
@@ -628,7 +656,8 @@ void MainWindow::run()
   if(indexes.size() != 1) return;
   QModelIndex index = indexes[0];
   const kiss::KarPtr archive = _archivesModel->archive(index);
-  run(_archivesModel->name(index), QString(archive->data(SERVER_ID_FILE)));
+  const QString id(archive->data(SERVER_ID_FILE));
+  run(_archivesModel->name(index), id.isEmpty() ? "computer" : id);
 }
 
 void MainWindow::remove()
@@ -692,6 +721,16 @@ void MainWindow::about()
   QMessageBox::information(this, tr("About cs2"), tr("Version %1.%2\nCopyright 2013 KISS"
     "Institute for Practical Robotics")
     .arg(CS2_VERSION_MAJOR).arg(CS2_VERSION_MINOR));
+}
+
+void MainWindow::processStarted()
+{
+  ui->actionStop->setEnabled(true);
+}
+
+void MainWindow::processFinished()
+{
+  ui->actionStop->setEnabled(false);
 }
 
 void MainWindow::startServer(ServerThread *&server, const quint16 port, const QString &id)

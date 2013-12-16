@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
   
 	QApplication::setOrganizationName("KIPR");
 	QApplication::setOrganizationDomain("kipr.org");
-	QApplication::setApplicationName("ks2");
+	QApplication::setApplicationName("cs2");
   
 #ifdef Q_OS_MAC
 	QDir::setCurrent(QApplication::applicationDirPath() + "/../");

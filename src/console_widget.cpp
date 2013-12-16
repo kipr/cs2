@@ -39,18 +39,23 @@ ProcessOutputBuffer *ConsoleWidget::processOutpuBuffer() const
 
 void ConsoleWidget::keyPressEvent(QKeyEvent *event)
 {
-  if(!_processOutputBuffer) return;
+  if(!_processOutputBuffer || !_processOutputBuffer->process()) return;
+  if(_processOutputBuffer->process()->state() != QProcess::Running) return;
+  
+  moveCursor(QTextCursor::End, QTextCursor::KeepAnchor);
+  
   QTextEdit::keyPressEvent(event);
   if(event->modifiers() != Qt::NoModifier && event->modifiers() != Qt::ShiftModifier) return;
   QString text = event->text();
-  // if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) text = "\n";
-  
   _processOutputBuffer->process()->write(text.toUtf8(), text.size());
 }
 
 void ConsoleWidget::read()
 {
-  if(_processOutputBuffer->output().isEmpty()) clear();
+  if(_processOutputBuffer->output().isEmpty()) {
+    clear();
+    _textStream->seek(0);
+  }
   insertPlainText(_textStream->readAll());
   moveCursor(QTextCursor::End, QTextCursor::KeepAnchor);
 }

@@ -284,8 +284,6 @@ void Robot::updateRangeLines()
 	m_rightRange->setLine(intersectDistance(m_rightRange, 45.0));
 }
 
-
-
 template<typename T>
 T sign(T t)
 {

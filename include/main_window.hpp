@@ -91,6 +91,9 @@ private slots:
   bool putRobotAndLight();
   
   void about();
+  
+  void processStarted();
+  void processFinished();
 	
 private:
 	void updateAdvert();
