@@ -147,6 +147,10 @@ MainWindow::MainWindow(QWidget *parent)
   connect(ui->selectBoard, SIGNAL(clicked()), SLOT(selectBoard()));
   
   connect(ui->actionAbout, SIGNAL(triggered()), SLOT(about()));
+  
+	connect(ui->programs->selectionModel(),
+		SIGNAL(currentChanged(QModelIndex, QModelIndex)),
+		SLOT(currentChanged(QModelIndex)));
 
   const bool ret = m_kmod->setup();
   if (!ret) qWarning() << "m_kmod->setup() failed.  (main_window.cpp : " << __LINE__ << ")";
@@ -165,6 +169,7 @@ MainWindow::MainWindow(QWidget *parent)
   updateAdvert();
   updateBoard();
   updateSettings();
+  currentChanged(QModelIndex());
   
   setState(MainWindow::Simulator);
   
