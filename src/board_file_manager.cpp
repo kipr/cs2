@@ -39,7 +39,7 @@ BoardFile *BoardFileManager::lookupBoardFile(const QString &name)
 
 void BoardFileManager::addLocation(const QString &path)
 {
-  _locations.push_back(path);
+  if(!_locations.contains(path)) _locations.push_back(path);
 }
 
 quint32 BoardFileManager::loadLocation(const QString &path)

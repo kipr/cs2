@@ -13,18 +13,17 @@ public:
   BoardFileManager(QObject *const parent = 0);
   ~BoardFileManager();
   
-  void addBoardFile(BoardFile *const file);
-  bool removeBoardFile(BoardFile *const file);
-  
   const QList<BoardFile *> &boardFiles() const;
-  
   BoardFile *lookupBoardFile(const QString &name);
   
   void addLocation(const QString &path);
-  quint32 loadLocation(const QString &path);
   
   void reload();
 private:
+  void addBoardFile(BoardFile *const file);
+  bool removeBoardFile(BoardFile *const file);
+  quint32 loadLocation(const QString &path);
+  
   QList<BoardFile *> _boards;
   QStringList _locations;
 };

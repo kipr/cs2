@@ -76,8 +76,6 @@ MainWindow::MainWindow(QWidget *parent)
   ui->setupUi(this);
   ui->sim->setViewportUpdateMode(QGraphicsView::NoViewportUpdate);
   
-  qDebug() << "Loaded" << _boardFileManager.loadLocation(QDir::currentPath()) << "board(s)";
-  
   _analogs->setMapping(PortConfiguration::currentAnalogMapping(), QStringList()
     << tr("Left Range") << tr("Middle Range") << tr("Right Range")
     << tr("Left Light") << tr("Right Light") << tr("Left Reflectance")
@@ -115,8 +113,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_servos[i]->setMinimumValue(0);
     m_servos[i]->setMaximumValue(2047);
   }
-
-  if(ui->sim->scene()) ui->sim->scene()->addItem(m_light);
 
   connect(_timer, SIGNAL(timeout()), SLOT(update()));
   _timer->start(50);
@@ -167,9 +163,16 @@ MainWindow::MainWindow(QWidget *parent)
   ui->actionStop->setEnabled(false);
 
   updateAdvert();
-  updateBoard();
   updateSettings();
   currentChanged(QModelIndex());
+  
+  _boardFileManager.addLocation(QDir::currentPath());
+  _boardFileManager.addLocation(Compiler::RootManager(_computerServer->userRoot()).boardPath());
+  _boardFileManager.addLocation(Compiler::RootManager(_simulatorServer->userRoot()).boardPath());
+  _boardFileManager.reload();
+  updateBoard();
+  
+  connect(_simulatorServer, SIGNAL(newBoard(const QString &)), this, SLOT(newBoard(const QString &)));
   
   setState(MainWindow::Simulator);
   
@@ -694,6 +697,8 @@ void MainWindow::updateBoard()
 
 void MainWindow::selectBoard()
 {
+  _boardFileManager.reload();
+  
   BoardSelectorDialog boardSelector(this);
   boardSelector.setBoardFiles(_boardFileManager.boardFiles());
   if(boardSelector.exec() != QDialog::Accepted) return;
@@ -703,6 +708,18 @@ void MainWindow::selectBoard()
   QSettings settings;
   settings.beginGroup("board");
   settings.setValue("current_board", board->name());
+  settings.endGroup();
+  settings.sync();
+  updateBoard();
+}
+
+void MainWindow::newBoard(const QString& board)
+{ 
+  _boardFileManager.reload();
+  
+  QSettings settings;
+  settings.beginGroup("board");
+  settings.setValue("current_board", QFileInfo(board).baseName());
   settings.endGroup();
   settings.sync();
   updateBoard();
