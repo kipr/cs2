@@ -318,9 +318,11 @@ void MainWindow::update()
     int pos_goal = ((int)s.t[GOAL_POS_0_HIGH + i] << 16) | s.t[GOAL_POS_0_LOW + i];
     int pos_err = 0;
 
-    // TODO: are left/right switched?
-    if (i == 1) pos_err = pos_goal - MOTOR_SCALE * (int)m_robot->rightTravelDistance();
-    else if (i == 3) pos_err = pos_goal - MOTOR_SCALE * (int)m_robot->leftTravelDistance();
+    const int port = unfixPort(i);
+    Q_FOREACH(const int p, _motors.keys(0)) if(port == p) pos_err = pos_goal - MOTOR_SCALE
+      * (int)m_robot->leftTravelDistance();
+    Q_FOREACH(const int p, _motors.keys(0)) if(port == p) pos_err = pos_goal - MOTOR_SCALE
+      * (int)m_robot->rightTravelDistance();
 
     int desired_speed = s.t[(GOAL_SPEED_0_HIGH + i)] << 16 | s.t[(GOAL_SPEED_0_LOW + i)];
 
@@ -359,9 +361,8 @@ void MainWindow::update()
     }
 
     const static double m = 2.5;
-    int port = unfixPort(i);
-    foreach(const int p, _motors.keys(0)) if(port == p) m_robot->setLeftSpeed(val * (pwm ? m : 1.0));
-    foreach(const int p, _motors.keys(1)) if(port == p) m_robot->setRightSpeed(val * (pwm ? m : 1.0));
+    Q_FOREACH(const int p, _motors.keys(0)) if(port == p) m_robot->setLeftSpeed(val * (pwm ? m : 1.0));
+    Q_FOREACH(const int p, _motors.keys(1)) if(port == p) m_robot->setRightSpeed(val * (pwm ? m : 1.0));
 
     m_motors[port]->setValue(val * 100.0);
     m_servos[i]->setValue((s.t[servos[port]] - 6500) * 2048 / 26000);
@@ -468,8 +469,6 @@ void MainWindow::run(const QString &executable, const QString &id)
 {
   stop();
   
-  qDebug() << "RUN";
-  
   if(id == "computer") {
     setState(MainWindow::Computer);
   } else if(id == "simulator") {
@@ -478,8 +477,6 @@ void MainWindow::run(const QString &executable, const QString &id)
     qWarning() << "Unknown id" << id;
     return;
   }
-  
-  qDebug() << "CREATE PROCESS";
   
   m_process = new QProcess();
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -516,11 +513,8 @@ void MainWindow::run(const QString &executable, const QString &id)
     const QString msg = tr("Failed to start %1").arg(executable);
     ui->console->append(msg);
     ui->linkConsole->append(msg);
-    qWarning() << msg;
     return;
   }
-  
-  qDebug() << "Started" << root.bin(executable).filePath(executable);
   
   processStarted();
 
@@ -741,7 +735,7 @@ bool MainWindow::putRobotAndLight()
 void MainWindow::about()
 {
   QMessageBox::information(this, tr("About cs2"), tr("Version %1.%2\nCopyright 2013 KISS"
-    "Institute for Practical Robotics")
+    " Institute for Practical Robotics")
     .arg(CS2_VERSION_MAJOR).arg(CS2_VERSION_MINOR));
 }
 
