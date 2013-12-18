@@ -32,6 +32,7 @@ public:
 	
 Q_SIGNALS:
 	void stateChanged(const QString &state);
+  void newBoard(const QString &board);
 	void run(const QString &executable, const QString &id);
 	
 private:

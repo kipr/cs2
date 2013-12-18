@@ -179,7 +179,6 @@ void ServerThread::handleAction(const Packet &action)
 			file.close();
 		}
 		
-		
 		OutputList output;
 		CompileWorker *worker = 0;
 		if(!archive.isNull()) {
@@ -196,6 +195,19 @@ void ServerThread::handleAction(const Packet &action)
 		}
 		
 		output << RootManager(m_userRoot).install(output, name);
+    
+    for(int i = 0; i < output.size(); ++i) {
+      const Output &o = output.at(i);
+      if(o.terminal() != Output::BoardTerminal) continue;
+      
+      const QStringList &boards = o.generatedFiles();
+      const int numBoards = boards.size();
+      if(numBoards == 0) break;
+      if(numBoards > 1)
+        foreach(const QString &board, boards)
+          output << Output(board, 0, "warning: multiple board files detected within project; undefined which will be used", QByteArray());
+      emit newBoard(boards.at(0));
+    }
 				
 		if(worker) worker->cleanup();
 		
