@@ -34,6 +34,5 @@ void ProcessOutputBuffer::readyRead()
   if(!_process) return;
   _output.append(_process->readAllStandardOutput());
   _output.append(_process->readAllStandardError());
-  qDebug() << _output;
   Q_EMIT outputChanged();
 }
