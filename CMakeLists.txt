@@ -80,7 +80,7 @@ ENDIF(APPLE)
 
 IF(APPLE)
 	ADD_CUSTOM_TARGET(cs2_MacDeployQt ALL 
-		COMMAND ${QT_BINARY_DIR}/macdeployqt ${CMAKE_SOURCE_DIR}/deploy/cs2.app -verbose=0
+		COMMAND ${_qt5Core_install_prefix}/bin/macdeployqt ${CMAKE_SOURCE_DIR}/deploy/cs2.app -verbose=0
 		WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 		DEPENDS cs2)
 	
