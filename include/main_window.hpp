@@ -23,6 +23,7 @@
 #include <QDir>
 #include <QMap>
 #include <QModelIndex>
+#include <QTime>
 
 #include "button_ids.hpp"
 #include "board_file_manager.hpp"
@@ -131,6 +132,7 @@ private:
 	QProcess *m_process;
   
   QTimer *_timer;
+  QTime _time;
   
   QDir _workingDirectory;
   ArchivesModel *_archivesModel;
