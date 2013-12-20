@@ -20,7 +20,7 @@ QString QUserInfo::username()
 	else ret = QString::fromUtf16(str);
 #else
 	if(!GetUserName((TCHAR*)str, &size)) ret = "";
-	else ret = QString::fromAscii(str);
+	else ret = QString::fromLatin1(str);
 #endif
 
 #else
