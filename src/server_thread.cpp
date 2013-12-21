@@ -146,10 +146,11 @@ void ServerThread::handleArchive(const Packet &headerPacket)
 	QDataStream stream(arr);
 	stream >> *archive;
   archive->setFile(SERVER_ID_FILE, _id.toUtf8());
-	if(!QDir(m_userRoot + "/archives").exists()) QDir(m_userRoot + "/archives").mkpath(".");
-	if(!archive->save(QDir(m_userRoot + "/archives").filePath(name))) {
-		qWarning() << "Failed to save archive to " << QDir(m_userRoot + "/archives").filePath(name);
-	}
+  
+  Compiler::RootManager root(m_userRoot);
+	root.ensureSetup();
+	if(!archive->save(root.archivesPath(name)))
+    qWarning() << "Failed to save archive to " << root.archivesPath(name);
 	delete archive;
 
 	emit stateChanged(tr("Received Program."));

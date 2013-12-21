@@ -579,7 +579,7 @@ void MainWindow::updateSettings()
   
   _simulatorServer->setUserRoot(prog.path());
   _computerServer->setUserRoot(prog.path());
-  _archivesModel->setArchivesRoot(prog.absoluteFilePath("archives") + "/");
+  _archivesModel->setArchivesRoot(Compiler::RootManager(prog.path()).archivesPath());
 
   settings.endGroup();
 }
@@ -667,7 +667,9 @@ void MainWindow::remove()
   const QModelIndexList indexes = ui->programs->selectionModel()->selectedIndexes();
   if(indexes.size() != 1) return;
   QModelIndex index = indexes[0];
-  QFile::remove(_archivesModel->path(index));
+  QDir dir(_archivesModel->archivesRoot());
+  dir.cdUp();
+  Compiler::RootManager(dir.absolutePath()).uninstall(_archivesModel->name(index));
   currentChanged(QModelIndex());
 }
 
