@@ -147,10 +147,9 @@ void ServerThread::handleArchive(const Packet &headerPacket)
 	stream >> *archive;
   archive->setFile(SERVER_ID_FILE, _id.toUtf8());
   
-  Compiler::RootManager root(m_userRoot);
-	root.ensureSetup();
-	if(!archive->save(root.archivesPath(name)))
-    qWarning() << "Failed to save archive to " << root.archivesPath(name);
+  const QString &saveLocation = Compiler::RootManager(m_userRoot).archivesPath(name);
+	if(!archive->save(saveLocation))
+    qWarning() << "Failed to save archive to " << saveLocation;
 	delete archive;
 
 	emit stateChanged(tr("Received Program."));

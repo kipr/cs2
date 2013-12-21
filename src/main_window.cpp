@@ -577,9 +577,11 @@ void MainWindow::updateSettings()
   prog.makeAbsolute();
   if(!prog.exists()) QDir().mkpath(prog.absolutePath());
   
+  Compiler::RootManager root(prog.path());
+  root.ensureSetup();
   _simulatorServer->setUserRoot(prog.path());
   _computerServer->setUserRoot(prog.path());
-  _archivesModel->setArchivesRoot(Compiler::RootManager(prog.path()).archivesPath());
+  _archivesModel->setArchivesRoot(root.archivesPath());
 
   settings.endGroup();
 }
