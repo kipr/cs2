@@ -1,6 +1,7 @@
 #include "server_thread.hpp"
 
 #include "compile_worker.hpp"
+#include "cs2.hpp"
 
 #include <kovanserial/tcp_server.hpp>
 #include <kovanserial/kovan_serial.hpp>

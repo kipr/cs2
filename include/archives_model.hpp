@@ -22,6 +22,7 @@ public:
   kiss::KarPtr archive(const QModelIndex index) const;
 	QString path(const QModelIndex index) const;
 	QString name(const QModelIndex index) const;
+  QString id(const QModelIndex index) const;
 	
 private Q_SLOTS:
 	void refresh();

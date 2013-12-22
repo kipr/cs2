@@ -4,6 +4,8 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QFileSystemWatcher>
+#include <QDebug>
+#include "cs2.hpp"
 
 class ArchiveItem : public QStandardItem
 {
@@ -13,15 +15,22 @@ public:
 	{
 		setText(QFileInfo(path).fileName());
 		setIcon(QIcon(":/icons/brick.png"));
+    m_id = kiss::Kar::load(m_path)->data(SERVER_ID_FILE);
 	}
 	
 	const QString &path() const
 	{
 		return m_path;
 	}
+  
+  const QString &id() const
+  {
+    return m_id;
+  }
 	
 private:
 	QString m_path;
+  QString m_id;
 };
 
 ArchivesModel::ArchivesModel(QObject *parent)
@@ -63,6 +72,13 @@ QString ArchivesModel::path(const QModelIndex index) const
 QString ArchivesModel::name(const QModelIndex index) const
 {
 	return QFileInfo(path(index)).fileName();
+}
+
+QString ArchivesModel::id(const QModelIndex index) const
+{
+	const ArchiveItem *const item = dynamic_cast<const ArchiveItem *>(itemFromIndex(index));
+	if(!item) return QString();
+	return item->id();
 }
 
 void ArchivesModel::refresh()

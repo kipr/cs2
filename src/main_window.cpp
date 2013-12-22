@@ -191,6 +191,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::setState(const State state)
 {
+  if(_state == state) return;
   _state = state;
   ui->sim->setVisible(state == MainWindow::Simulator);
   ui->console->setVisible(state == MainWindow::Computer);
@@ -202,6 +203,13 @@ void MainWindow::setState(const State state)
     case MainWindow::Simulator: setWindowTitle(tr("Link 2D Simulator")); break;
   }
   
+}
+
+void MainWindow::setState(const QString &state)
+{
+  if(state == "computer") setState(MainWindow::Computer);
+  else if(state == "simulator") setState(MainWindow::Simulator);
+  else qWarning() << "unknown state id:" << state;
 }
 
 MainWindow::State MainWindow::state() const
@@ -469,14 +477,7 @@ void MainWindow::run(const QString &executable, const QString &id)
 {
   stop();
   
-  if(id == "computer") {
-    setState(MainWindow::Computer);
-  } else if(id == "simulator") {
-    setState(MainWindow::Simulator);
-  } else {
-    qWarning() << "Unknown id" << id;
-    return;
-  }
+  setState(id);
   
   m_process = new QProcess();
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -680,6 +681,8 @@ void MainWindow::currentChanged(const QModelIndex index)
   const bool e = index.isValid();
   ui->run->setEnabled(e);
   ui->remove->setEnabled(e);
+  
+  if(e) setState(_archivesModel->id(index));
 }
 
 void MainWindow::updateBoard()

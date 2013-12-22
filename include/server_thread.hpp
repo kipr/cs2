@@ -8,8 +8,6 @@
 #include <kar/kar.hpp>
 #include <kovanserial/transport_layer.hpp>
 
-#define SERVER_ID_FILE (KAR_SPECIAL_PREFIX "id")
-
 class TcpServer;
 class KovanSerial;
 

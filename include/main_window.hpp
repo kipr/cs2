@@ -65,6 +65,7 @@ public:
   };
   
   void setState(const State state);
+  void setState(const QString &state);
   State state() const;
 	
 private slots:
