@@ -191,7 +191,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::setState(const State state)
 {
-  if(_state == state) return;
   _state = state;
   ui->sim->setVisible(state == MainWindow::Simulator);
   ui->console->setVisible(state == MainWindow::Computer);
