@@ -851,9 +851,8 @@
   </action>
   <action name="actionReset">
    <property name="icon">
-    <iconset>
-     <normalon>:/icons/arrow_refresh_small.png</normalon>
-    </iconset>
+    <iconset resource="../rc/icons.qrc">
+     <normaloff>:/icons/arrow_refresh_small.png</normaloff>:/icons/arrow_refresh_small.png</iconset>
    </property>
    <property name="text">
     <string>Reset</string>
