@@ -294,7 +294,11 @@
          </layout>
         </item>
         <item row="1" column="2">
-         <widget class="QLineEdit" name="displayNameSimulatorEdit"/>
+         <widget class="QLineEdit" name="displayNameSimulatorEdit">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
         </item>
         <item row="2" column="2">
          <widget class="QLineEdit" name="passwordEdit">
