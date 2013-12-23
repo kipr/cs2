@@ -104,7 +104,8 @@ private:
 	void updateAdvert();
 	int unfixPort(int port);
 	void setDigital(int port, bool on);
-  void displayName();
+  QString displayNameComputer();
+  QString displayNameSimulator();
   
   void startServer(ServerThread *&server, const quint16 port, const QString &id);
   

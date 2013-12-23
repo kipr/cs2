@@ -37,6 +37,7 @@
 #include "settings_dialog.hpp"
 #include "archives_model.hpp"
 #include <kovan/camera.hpp>
+#include "quser_info.hpp"
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -546,8 +547,6 @@ void MainWindow::updateSettings()
   
   settings.endGroup();
 
-  updateAdvert();
-
   QPalette pal = ui->console->palette();
   pal.setColor(QPalette::Base, consoleColor);
   ui->console->setPalette(pal);
@@ -582,6 +581,8 @@ void MainWindow::updateSettings()
   _archivesModel->setArchivesRoot(root.archivesPath());
 
   settings.endGroup();
+  
+  updateAdvert();
 }
 
 void MainWindow::updateAdvert()
@@ -599,13 +600,13 @@ void MainWindow::updateAdvert()
   Advert ads(tr("N/A").toUtf8(),
     version.toUtf8(),
     tr("2D Simulator").toUtf8(),
-    tr("Simulator").toUtf8(),
+    displayNameSimulator().toUtf8(),
     KOVAN_SERIAL_PORT + 2);
     
   Advert adc(tr("N/A").toUtf8(),
     version.toUtf8(),
     tr("Local Computer").toUtf8(),
-    tr("Computer").toUtf8(),
+    displayNameComputer().toUtf8(),
     KOVAN_SERIAL_PORT + 1);
     
 	m_heartbeat->setAdverts(QList<Advert>() << ads << adc);
@@ -640,6 +641,36 @@ void MainWindow::setDigital(int port, bool on)
   Kovan::State &s = m_kmod->state();
   if(!on) s.t[DIG_IN] |= 1 << (7 - port);
   else s.t[DIG_IN] &= ~(1 << (7 - port));
+}
+
+QString MainWindow::displayNameComputer()
+{
+	QString ret;
+	
+	QSettings settings;
+	settings.beginGroup(KISS_CONNECTION);
+	settings.beginGroup(DISPLAY_NAME);
+	if(settings.value(COMPUTER_DEFAULT).toBool()) ret = QUserInfo::username() + "'s Computer";
+	else ret = settings.value(COMPUTER_CUSTOM_NAME).toString();
+	settings.endGroup();
+	settings.endGroup();
+	
+	return ret;
+}
+
+QString MainWindow::displayNameSimulator()
+{
+	QString ret;
+	
+	QSettings settings;
+	settings.beginGroup(KISS_CONNECTION);
+	settings.beginGroup(DISPLAY_NAME);
+	if(settings.value(SIMULATOR_DEFAULT).toBool()) ret = QUserInfo::username() + "'s Simulator";
+	else ret = settings.value(SIMULATOR_CUSTOM_NAME).toString();
+	settings.endGroup();
+	settings.endGroup();
+	
+	return ret;
 }
 
 void MainWindow::configPorts()
