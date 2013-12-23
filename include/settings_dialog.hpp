@@ -10,8 +10,10 @@
 #define FONT_SIZE "fontsize"
 #define KISS_CONNECTION "kissconnection"
 #define DISPLAY_NAME "displayname"
-#define DEFAULT "default"
-#define CUSTOM_NAME "customname"
+#define COMPUTER_DEFAULT "computerdefault"
+#define COMPUTER_CUSTOM_NAME "computercustomname"
+#define SIMULATOR_DEFAULT "simulatordefault"
+#define SIMULATOR_CUSTOM_NAME "simulatorcustomname"
 #define DISALLOW_REMOTE "disallowremote"
 #define TIMEOUT "timeout"
 #define STORAGE "storage"
@@ -22,6 +24,8 @@
 #define SECURITY_GROUP "security"
 #define SECURITY_PASSWORD "password"
 #define SECURITY_ENABLED "enabled"
+#define BOARD "board"
+#define CURRENT_BOARD "currentboard"
 
 namespace Ui {
 class SettingsDialog;
@@ -41,7 +45,7 @@ private Q_SLOTS:
 	void on_defaultButton_clicked();
 	void on_noneCheck_clicked();
 	void on_passwordCheck_clicked();
-	void on_password_textChanged(const QString &password);
+	void on_passwordEdit_textChanged(const QString &password);
 	void on_programDirectoryBrowse_clicked();
 	void on_workingDirectoryBrowse_clicked();
 	

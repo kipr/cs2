@@ -12,7 +12,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 {
 	ui->setupUi(this);
 	
-	connect(ui->customDisplayNameButton, SIGNAL(toggled(bool)), ui->customDisplayNameEdit, SLOT(setEnabled(bool)));
+	connect(ui->customDisplayNameComputerButton, SIGNAL(toggled(bool)), ui->displayNameComputerEdit, SLOT(setEnabled(bool)));
+  connect(ui->customDisplayNameSimulatorButton, SIGNAL(toggled(bool)), ui->displayNameSimulatorEdit, SLOT(setEnabled(bool)));
 	
 	readSettings();
 	saveSettings();
@@ -40,8 +41,8 @@ void SettingsDialog::on_defaultButton_clicked()
 
 void SettingsDialog::on_noneCheck_clicked()
 {
-	ui->password->setText(QString());
-	ui->password->setEnabled(false);
+	ui->passwordEdit->setText(QString());
+	ui->passwordEdit->setEnabled(false);
 	
 	QPushButton *button = ui->buttons->button(QDialogButtonBox::Ok);
 	if(!button) return;
@@ -50,10 +51,10 @@ void SettingsDialog::on_noneCheck_clicked()
 
 void SettingsDialog::on_passwordCheck_clicked()
 {
-	ui->password->setEnabled(true);
+	ui->passwordEdit->setEnabled(true);
 }
 
-void SettingsDialog::on_password_textChanged(const QString &password)
+void SettingsDialog::on_passwordEdit_textChanged(const QString &password)
 {
 	QPushButton *button = ui->buttons->button(QDialogButtonBox::Ok);
 	if(!button) return;
@@ -91,19 +92,21 @@ void SettingsDialog::readSettings()
 	
 	settings.beginGroup(KISS_CONNECTION);
 	settings.beginGroup(DISPLAY_NAME);
-	const bool def = settings.value(DEFAULT, true).toBool();
-	ui->defaultDisplayNameButton->setChecked(def);
-	ui->customDisplayNameButton->setChecked(!def);
-	ui->customDisplayNameEdit->setText(settings.value(CUSTOM_NAME, "").toString());
+	const bool compDef = settings.value(COMPUTER_DEFAULT, true).toBool();
+	ui->defaultDisplayNameComputerButton->setChecked(compDef);
+	ui->customDisplayNameComputerButton->setChecked(!compDef);
+	ui->displayNameComputerEdit->setText(settings.value(COMPUTER_CUSTOM_NAME, "").toString());
+	const bool simDef = settings.value(SIMULATOR_DEFAULT, true).toBool();
+	ui->defaultDisplayNameSimulatorButton->setChecked(simDef);
+	ui->customDisplayNameSimulatorButton->setChecked(!simDef);
+	ui->displayNameSimulatorEdit->setText(settings.value(SIMULATOR_CUSTOM_NAME, "").toString());
 	settings.endGroup();
 	settings.beginGroup(SECURITY_GROUP);
 	const bool enabled = settings.value(SECURITY_ENABLED, false).toBool();
 	ui->passwordCheck->setChecked(enabled);
 	if(enabled) ui->passwordCheck->click();
 	else ui->noneCheck->click();
-	ui->password->setText(settings.value(SECURITY_PASSWORD).toString());
-	
-	
+	ui->passwordEdit->setText(settings.value(SECURITY_PASSWORD).toString());
 	settings.endGroup();
 	settings.endGroup();
 	
@@ -118,7 +121,6 @@ void SettingsDialog::readSettings()
 void SettingsDialog::saveSettings()
 {
 	QSettings settings;
-	const bool defaultChecked = ui->defaultDisplayNameButton->isChecked();
 	
 	settings.beginGroup(APPEARANCE);
 	settings.setValue(CONSOLE_COLOR, ui->consoleColorBox->getColor());
@@ -130,12 +132,14 @@ void SettingsDialog::saveSettings()
 	
 	settings.beginGroup(KISS_CONNECTION);
 	settings.beginGroup(DISPLAY_NAME);
-	settings.setValue(DEFAULT, defaultChecked);
-	settings.setValue(CUSTOM_NAME, ui->customDisplayNameEdit->text());
+	settings.setValue(COMPUTER_DEFAULT, ui->defaultDisplayNameComputerButton->isChecked());
+	settings.setValue(COMPUTER_CUSTOM_NAME, ui->displayNameComputerEdit->text());
+	settings.setValue(SIMULATOR_DEFAULT, ui->defaultDisplayNameSimulatorButton->isChecked());
+	settings.setValue(SIMULATOR_CUSTOM_NAME, ui->displayNameSimulatorEdit->text());
 	settings.endGroup();
 	settings.beginGroup(SECURITY_GROUP);
 	settings.setValue(SECURITY_ENABLED, ui->passwordCheck->isChecked());
-	settings.setValue(SECURITY_PASSWORD, ui->password->text());
+	settings.setValue(SECURITY_PASSWORD, ui->passwordEdit->text());
 	settings.endGroup();
 	settings.endGroup();
 	

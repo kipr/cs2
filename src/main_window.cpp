@@ -690,8 +690,8 @@ void MainWindow::currentChanged(const QModelIndex index)
 void MainWindow::updateBoard()
 {
   QSettings settings;
-  settings.beginGroup("board");
-  BoardFile *const boardFile = _boardFileManager.lookupBoardFile(settings.value("current_board",
+  settings.beginGroup(BOARD);
+  BoardFile *const boardFile = _boardFileManager.lookupBoardFile(settings.value(CURRENT_BOARD,
     "2013").toString());
   settings.endGroup();
   ui->sim->setScene(boardFile->scene());
@@ -709,8 +709,8 @@ void MainWindow::selectBoard()
   if(!board) return;
   
   QSettings settings;
-  settings.beginGroup("board");
-  settings.setValue("current_board", board->name());
+  settings.beginGroup(BOARD);
+  settings.setValue(CURRENT_BOARD, board->name());
   settings.endGroup();
   settings.sync();
   updateBoard();
@@ -721,8 +721,8 @@ void MainWindow::newBoard(const QString& board)
   _boardFileManager.reload();
   
   QSettings settings;
-  settings.beginGroup("board");
-  settings.setValue("current_board", QFileInfo(board).baseName());
+  settings.beginGroup(BOARD);
+  settings.setValue(CURRENT_BOARD, QFileInfo(board).baseName());
   settings.endGroup();
   settings.sync();
   updateBoard();
