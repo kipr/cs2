@@ -133,15 +133,12 @@ MainWindow::MainWindow(QWidget *parent)
   
   connect(ui->run, SIGNAL(clicked()), SLOT(run()));
   connect(ui->remove, SIGNAL(clicked()), SLOT(remove()));
-  
   connect(ui->actionStop, SIGNAL(triggered()), SLOT(stop()));
-  connect(ui->actionQuit, SIGNAL(triggered()), QCoreApplication::instance(), SLOT(quit()));
-  
   connect(ui->actionReset, SIGNAL(triggered()), SLOT(reset()));
-  
+  connect(ui->actionQuit, SIGNAL(triggered()), QCoreApplication::instance(), SLOT(quit()));
   connect(ui->portConfig, SIGNAL(clicked()), SLOT(configPorts()));
   connect(ui->selectBoard, SIGNAL(clicked()), SLOT(selectBoard()));
-  
+  connect(ui->actionSettings, SIGNAL(triggered()), SLOT(settings()));
   connect(ui->actionAbout, SIGNAL(triggered()), SLOT(about()));
   
 	connect(ui->programs->selectionModel(),
@@ -630,6 +627,11 @@ void MainWindow::reset()
   m_robot->robot()[0]->setRotation(45);
   ui->linkConsole->clear();
   ui->console->clear();
+}
+
+void MainWindow::settings()
+{
+	if(m_settingsDialog.exec()) updateSettings();
 }
 
 void MainWindow::setDigital(int port, bool on)

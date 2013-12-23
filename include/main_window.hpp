@@ -27,6 +27,7 @@
 
 #include "button_ids.hpp"
 #include "board_file_manager.hpp"
+#include "settings_dialog.hpp"
 
 namespace Ui
 {
@@ -74,6 +75,7 @@ private slots:
 	void textChanged(::Button::Type::Id id, const QString &text);
 	void update();
 	void reset();
+  void settings();
 	
 	void finished(int exitCode);
 	
@@ -109,13 +111,13 @@ private:
   BoardFileManager _boardFileManager;
 	
 	Ui::MainWindow *ui;
+  SettingsDialog m_settingsDialog;
 	
   MappingModel *_analogs;
   MappingModel *_digitals;
   QMap<int, int> _motors;
 	TouchDial *m_motors[4];
 	TouchDial *m_servos[4];
-  
   
 	Robot *m_robot;
 	Light *m_light;
@@ -139,7 +141,6 @@ private:
   ArchivesModel *_archivesModel;
   
   ProcessOutputBuffer *const _processOutputBuffer;
-  
 };
 
 #endif
