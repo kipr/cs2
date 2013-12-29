@@ -725,7 +725,8 @@ void MainWindow::updateBoard()
   BoardFile *const boardFile = _boardFileManager.lookupBoardFile(settings.value(CURRENT_BOARD,
     "2013").toString());
   settings.endGroup();
-  ui->sim->setScene(boardFile->scene());
+  if(boardFile) ui->sim->setScene(boardFile->scene());
+  else ui->sim->setScene(_boardFileManager.lookupBoardFile("2013")->scene());
   putRobotAndLight();
 }
 
