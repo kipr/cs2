@@ -57,13 +57,13 @@ class MainWindow : public QMainWindow
 {
 Q_OBJECT
 public:
-	MainWindow(QWidget *parent = 0);
-	~MainWindow();
-  
   enum State {
     Simulator,
     Computer
   };
+  
+	MainWindow(State startingState, QWidget *parent = 0);
+	~MainWindow();
   
   void setState(const State state);
   void setState(const QString &state);

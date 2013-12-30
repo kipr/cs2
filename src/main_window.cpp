@@ -59,7 +59,7 @@
 
 #include <cmath>
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(State startingState, QWidget *parent)
   : QMainWindow(parent)
   , ui(new Ui::MainWindow)
   , _analogs(new MappingModel)
@@ -172,7 +172,7 @@ MainWindow::MainWindow(QWidget *parent)
   
   connect(_simulatorServer, SIGNAL(newBoard(const QString &)), this, SLOT(newBoard(const QString &)));
   
-  setState(MainWindow::Simulator);
+  setState(startingState);
   
   ui->console->setProcessOutputBuffer(_processOutputBuffer);
   ui->linkConsole->setProcessOutputBuffer(_processOutputBuffer);

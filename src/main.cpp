@@ -41,7 +41,8 @@ int main(int argc, char *argv[])
 	QDir::setCurrent(QApplication::applicationDirPath());
 #endif
   
-	MainWindow mainWindow;
+	MainWindow mainWindow((argc > 1 && strcmp(argv[0], "-c"))
+    ? MainWindow::Computer : MainWindow::Simulator);
 	mainWindow.show();
 	mainWindow.raise();
 	return app.exec();
