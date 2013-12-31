@@ -37,6 +37,7 @@
 #include "settings_dialog.hpp"
 #include "archives_model.hpp"
 #include <kovan/camera.hpp>
+#include "quser_info.hpp"
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -58,7 +59,7 @@
 
 #include <cmath>
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(State startingState, QWidget *parent)
   : QMainWindow(parent)
   , ui(new Ui::MainWindow)
   , _analogs(new MappingModel)
@@ -171,7 +172,7 @@ MainWindow::MainWindow(QWidget *parent)
   
   connect(_simulatorServer, SIGNAL(newBoard(const QString &)), this, SLOT(newBoard(const QString &)));
   
-  setState(MainWindow::Simulator);
+  setState(startingState);
   
   ui->console->setProcessOutputBuffer(_processOutputBuffer);
   ui->linkConsole->setProcessOutputBuffer(_processOutputBuffer);
@@ -546,8 +547,6 @@ void MainWindow::updateSettings()
   
   settings.endGroup();
 
-  updateAdvert();
-
   QPalette pal = ui->console->palette();
   pal.setColor(QPalette::Base, consoleColor);
   ui->console->setPalette(pal);
@@ -582,6 +581,8 @@ void MainWindow::updateSettings()
   _archivesModel->setArchivesRoot(root.archivesPath());
 
   settings.endGroup();
+  
+  updateAdvert();
 }
 
 void MainWindow::updateAdvert()
@@ -599,13 +600,13 @@ void MainWindow::updateAdvert()
   Advert ads(tr("N/A").toUtf8(),
     version.toUtf8(),
     tr("2D Simulator").toUtf8(),
-    tr("Simulator").toUtf8(),
+    displayNameSimulator().toUtf8(),
     KOVAN_SERIAL_PORT + 2);
     
   Advert adc(tr("N/A").toUtf8(),
     version.toUtf8(),
     tr("Local Computer").toUtf8(),
-    tr("Computer").toUtf8(),
+    displayNameComputer().toUtf8(),
     KOVAN_SERIAL_PORT + 1);
     
 	m_heartbeat->setAdverts(QList<Advert>() << ads << adc);
@@ -640,6 +641,36 @@ void MainWindow::setDigital(int port, bool on)
   Kovan::State &s = m_kmod->state();
   if(!on) s.t[DIG_IN] |= 1 << (7 - port);
   else s.t[DIG_IN] &= ~(1 << (7 - port));
+}
+
+QString MainWindow::displayNameComputer()
+{
+	QString ret;
+	
+	QSettings settings;
+	settings.beginGroup(KISS_CONNECTION);
+	settings.beginGroup(DISPLAY_NAME);
+	if(settings.value(COMPUTER_DEFAULT).toBool()) ret = QUserInfo::username() + "'s Computer";
+	else ret = settings.value(COMPUTER_CUSTOM_NAME).toString();
+	settings.endGroup();
+	settings.endGroup();
+	
+	return ret;
+}
+
+QString MainWindow::displayNameSimulator()
+{
+	QString ret;
+	
+	QSettings settings;
+	settings.beginGroup(KISS_CONNECTION);
+	settings.beginGroup(DISPLAY_NAME);
+	if(settings.value(SIMULATOR_DEFAULT).toBool()) ret = QUserInfo::username() + "'s Simulator";
+	else ret = settings.value(SIMULATOR_CUSTOM_NAME).toString();
+	settings.endGroup();
+	settings.endGroup();
+	
+	return ret;
 }
 
 void MainWindow::configPorts()
@@ -690,11 +721,12 @@ void MainWindow::currentChanged(const QModelIndex index)
 void MainWindow::updateBoard()
 {
   QSettings settings;
-  settings.beginGroup("board");
-  BoardFile *const boardFile = _boardFileManager.lookupBoardFile(settings.value("current_board",
+  settings.beginGroup(BOARD);
+  BoardFile *const boardFile = _boardFileManager.lookupBoardFile(settings.value(CURRENT_BOARD,
     "2013").toString());
   settings.endGroup();
-  ui->sim->setScene(boardFile->scene());
+  if(boardFile) ui->sim->setScene(boardFile->scene());
+  else ui->sim->setScene(_boardFileManager.lookupBoardFile("2013")->scene());
   putRobotAndLight();
 }
 
@@ -709,8 +741,8 @@ void MainWindow::selectBoard()
   if(!board) return;
   
   QSettings settings;
-  settings.beginGroup("board");
-  settings.setValue("current_board", board->name());
+  settings.beginGroup(BOARD);
+  settings.setValue(CURRENT_BOARD, board->name());
   settings.endGroup();
   settings.sync();
   updateBoard();
@@ -721,8 +753,8 @@ void MainWindow::newBoard(const QString& board)
   _boardFileManager.reload();
   
   QSettings settings;
-  settings.beginGroup("board");
-  settings.setValue("current_board", QFileInfo(board).baseName());
+  settings.beginGroup(BOARD);
+  settings.setValue(CURRENT_BOARD, QFileInfo(board).baseName());
   settings.endGroup();
   settings.sync();
   updateBoard();

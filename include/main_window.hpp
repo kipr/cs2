@@ -57,13 +57,13 @@ class MainWindow : public QMainWindow
 {
 Q_OBJECT
 public:
-	MainWindow(QWidget *parent = 0);
-	~MainWindow();
-  
   enum State {
     Simulator,
     Computer
   };
+  
+	MainWindow(State startingState, QWidget *parent = 0);
+	~MainWindow();
   
   void setState(const State state);
   void setState(const QString &state);
@@ -104,6 +104,8 @@ private:
 	void updateAdvert();
 	int unfixPort(int port);
 	void setDigital(int port, bool on);
+  QString displayNameComputer();
+  QString displayNameSimulator();
   
   void startServer(ServerThread *&server, const quint16 port, const QString &id);
   

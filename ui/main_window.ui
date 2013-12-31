@@ -761,7 +761,7 @@
     <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>Programs</string>
+    <string>Projects</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
