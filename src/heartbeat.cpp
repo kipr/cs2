@@ -7,9 +7,11 @@ Heartbeat::Heartbeat(QObject *parent)
 	: QObject(parent),
 	_advertiser(true)
 {
-	QTimer *timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), SLOT(beat()));
-	timer->start(3000);
+#ifdef Q_OS_LINUX
+  QTimer *timer = new QTimer(this);
+  connect(timer, SIGNAL(timeout()), SLOT(beat()));
+  timer->start(3000);
+#endif
 }
 
 Heartbeat::~Heartbeat()
