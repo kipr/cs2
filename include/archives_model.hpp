@@ -23,12 +23,12 @@ public:
 	QString path(const QModelIndex index) const;
 	QString name(const QModelIndex index) const;
   QString id(const QModelIndex index) const;
+  const QModelIndex indexFromName(const QString &name) const;
 	
 private Q_SLOTS:
 	void refresh();
 	
 private:
-	
 	QString m_archivesRoot;
 	QFileSystemWatcher *m_watcher;
 };

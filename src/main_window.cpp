@@ -159,23 +159,22 @@ MainWindow::MainWindow(State startingState, QWidget *parent)
     SLOT(textChanged(::Button::Type::Id, QString)));
 
   ui->actionStop->setEnabled(false);
+  
+  _boardFileManager.addLocation(QDir::currentPath());
+  _boardFileManager.reload();
 
   updateAdvert();
   updateSettings();
-  currentChanged(QModelIndex());
-  
-  _boardFileManager.addLocation(QDir::currentPath());
-  _boardFileManager.addLocation(Compiler::RootManager(_computerServer->userRoot()).boardPath());
-  _boardFileManager.addLocation(Compiler::RootManager(_simulatorServer->userRoot()).boardPath());
-  _boardFileManager.reload();
-  updateBoard();
-  
-  connect(_simulatorServer, SIGNAL(newBoard(const QString &)), this, SLOT(newBoard(const QString &)));
+  connect(_simulatorServer, SIGNAL(installFinished(const QString &)), this, SLOT(selectArchive(const QString &)));
+  connect(_computerServer, SIGNAL(installFinished(const QString &)), this, SLOT(selectArchive(const QString &)));
   
   setState(startingState);
   
   ui->console->setProcessOutputBuffer(_processOutputBuffer);
   ui->linkConsole->setProcessOutputBuffer(_processOutputBuffer);
+  
+  if(_archivesModel->rowCount() > 0) ui->programs->setCurrentIndex(_archivesModel->index(0, 0));
+  else setBoard(_boardFileManager.lookupBoardFile(defaultBoard()));
 }
 
 MainWindow::~MainWindow()
@@ -706,34 +705,11 @@ void MainWindow::remove()
   QDir dir(_archivesModel->archivesRoot());
   dir.cdUp();
   Compiler::RootManager(dir.absolutePath()).uninstall(_archivesModel->name(index));
-  currentChanged(QModelIndex());
-}
-
-void MainWindow::currentChanged(const QModelIndex index)
-{
-  const bool e = index.isValid();
-  ui->run->setEnabled(e);
-  ui->remove->setEnabled(e);
-  
-  if(e) setState(_archivesModel->id(index));
-}
-
-void MainWindow::updateBoard()
-{
-  QSettings settings;
-  settings.beginGroup(BOARD);
-  BoardFile *const boardFile = _boardFileManager.lookupBoardFile(settings.value(CURRENT_BOARD,
-    "2013").toString());
-  settings.endGroup();
-  if(boardFile) ui->sim->setScene(boardFile->scene());
-  else ui->sim->setScene(_boardFileManager.lookupBoardFile("2013")->scene());
-  putRobotAndLight();
+  ui->programs->setCurrentIndex(QModelIndex());
 }
 
 void MainWindow::selectBoard()
-{
-  _boardFileManager.reload();
-  
+{  
   BoardSelectorDialog boardSelector(this);
   boardSelector.setBoardFiles(_boardFileManager.boardFiles());
   if(boardSelector.exec() != QDialog::Accepted) return;
@@ -742,22 +718,53 @@ void MainWindow::selectBoard()
   
   QSettings settings;
   settings.beginGroup(BOARD);
-  settings.setValue(CURRENT_BOARD, board->name());
+  settings.setValue(DEFAULT_BOARD, board->name());
   settings.endGroup();
   settings.sync();
   updateBoard();
 }
 
-void MainWindow::newBoard(const QString& board)
-{ 
-  _boardFileManager.reload();
+void MainWindow::currentChanged(const QModelIndex index)
+{
+  const bool e = index.isValid();
+  ui->run->setEnabled(e);
+  ui->remove->setEnabled(e);
+  updateBoard();
   
+  if(e) setState(_archivesModel->id(index));
+}
+
+void MainWindow::updateBoard()
+{
+  const QModelIndex current = ui->programs->currentIndex();
+  if(current.isValid()) {
+    const QString &currentName = _archivesModel->name(current);
+    const QDir boardDir = Compiler::RootManager(_simulatorServer->userRoot()).board(currentName);
+    foreach(const QFileInfo &info, boardDir.entryInfoList(QStringList() << "*.board", QDir::Files)) {
+      BoardFile *const board = BoardFile::load(info.filePath());
+      if(!board) continue;
+      setBoard(board);
+      return;
+    }
+  }
+  setBoard(_boardFileManager.lookupBoardFile(defaultBoard()));
+}
+
+bool MainWindow::setBoard(BoardFile *boardFile)
+{
+  if(!boardFile) return false;
+  ui->sim->setScene(boardFile->scene());
+  return putRobotAndLight();
+}
+
+QString MainWindow::defaultBoard()
+{
   QSettings settings;
   settings.beginGroup(BOARD);
-  settings.setValue(CURRENT_BOARD, QFileInfo(board).baseName());
+  const QString ret = settings.value(DEFAULT_BOARD, "2013").toString();
   settings.endGroup();
-  settings.sync();
-  updateBoard();
+  
+  return ret;
 }
 
 bool MainWindow::putRobotAndLight()
@@ -772,6 +779,12 @@ bool MainWindow::putRobotAndLight()
   return true;
 }
 
+void MainWindow::selectArchive(const QString &name)
+{
+  const QModelIndex index = _archivesModel->indexFromName(name);
+  if(index == ui->programs->currentIndex()) currentChanged(index);
+  else ui->programs->setCurrentIndex(index);
+}
 
 void MainWindow::about()
 {

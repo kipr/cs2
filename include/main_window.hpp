@@ -89,7 +89,6 @@ private slots:
   
   void updateBoard();
   void selectBoard();
-  void newBoard(const QString &board);
   
   void updateSettings();
   
@@ -99,8 +98,12 @@ private slots:
   
   void processStarted();
   void processFinished();
+  
+  void selectArchive(const QString &name);
 	
 private:
+  bool setBoard(BoardFile *boardFile);
+  QString defaultBoard();
 	void updateAdvert();
 	int unfixPort(int port);
 	void setDigital(int port, bool on);

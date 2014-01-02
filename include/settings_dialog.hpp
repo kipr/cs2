@@ -25,7 +25,7 @@
 #define SECURITY_PASSWORD "password"
 #define SECURITY_ENABLED "enabled"
 #define BOARD "board"
-#define CURRENT_BOARD "currentboard"
+#define DEFAULT_BOARD "defaultboard"
 
 namespace Ui {
 class SettingsDialog;

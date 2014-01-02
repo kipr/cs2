@@ -207,8 +207,9 @@ void ServerThread::handleAction(const Packet &action)
       if(numBoards > 1)
         foreach(const QString &board, boards)
           output << Output(board, 0, "warning: multiple board files detected within project; undefined which will be used", QByteArray());
-      emit newBoard(boards.at(0));
     }
+    
+    emit installFinished(name);
 				
 		if(worker) worker->cleanup();
 		

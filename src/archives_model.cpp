@@ -15,7 +15,6 @@ public:
 	{
 		setText(QFileInfo(path).fileName());
 		setIcon(QIcon(":/icons/brick.png"));
-    m_id = kiss::Kar::load(m_path)->data(SERVER_ID_FILE);
 	}
 	
 	const QString &path() const
@@ -23,14 +22,15 @@ public:
 		return m_path;
 	}
   
-  const QString &id() const
+  const QString id() const
   {
-    return m_id;
+    kiss::KarPtr archive = kiss::Kar::load(m_path);
+    if(archive) return archive->data(SERVER_ID_FILE);
+    return QString();
   }
 	
 private:
 	QString m_path;
-  QString m_id;
 };
 
 ArchivesModel::ArchivesModel(QObject *parent)
@@ -79,6 +79,16 @@ QString ArchivesModel::id(const QModelIndex index) const
 	const ArchiveItem *const item = dynamic_cast<const ArchiveItem *>(itemFromIndex(index));
 	if(!item) return QString();
 	return item->id();
+}
+
+const QModelIndex ArchivesModel::indexFromName(const QString &name) const
+{
+  for(int i = 0; i < rowCount(); ++i) {
+    const QModelIndex in = index(i, 0);
+    if(this->name(in) == name) return in;
+  }
+  
+  return QModelIndex();
 }
 
 void ArchivesModel::refresh()
