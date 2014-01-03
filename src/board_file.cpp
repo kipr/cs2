@@ -16,22 +16,23 @@ BoardFile *BoardFile::load(const QString &path)
 {
   BoardFile *boardFile = new BoardFile();
   QFile file(path);
-  if(!file.open(QIODevice::ReadOnly)) return 0;
+  if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) return 0;
+  QTextStream in(&file);
+  QStringList lines;
+  while(!in.atEnd()) {
+    const QString &line = in.readLine();
+    if(!line.isEmpty()) lines << line;
+  }
   QGraphicsScene *scene = new QGraphicsScene(boardFile);
-  parse(file.readAll(), scene);
+  parse(lines, scene);
   
   boardFile->_scene = scene;
   boardFile->_name = QFileInfo(path).baseName();
   return boardFile;
 }
 
-void BoardFile::parse(const QString &contents, QGraphicsScene *scene)
+void BoardFile::parse(const QStringList &lines, QGraphicsScene *scene)
 {
-#ifndef Q_OS_WIN
-	const QStringList lines = contents.split("\n", QString::SkipEmptyParts);
-#else
-	const QStringList lines = contents.split("\r\n", QString::SkipEmptyParts);
-#endif
 	quint32 lineNum = 0;
 	QPen pen;
 	QBrush brush;

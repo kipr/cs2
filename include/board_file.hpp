@@ -29,7 +29,7 @@ public:
   QGraphicsScene *scene();
   
 private:
-  static void parse(const QString &contents, QGraphicsScene *scene);
+  static void parse(const QStringList &lines, QGraphicsScene *scene);
   static void error(const quint32 &line, const QString &id);
   static void error(const quint32 &line, const quint16 &expecting, const quint16 &got);
   
