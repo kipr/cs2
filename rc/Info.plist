@@ -7,11 +7,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleExecutable</key>
-	<string>ks2</string>
+	<string>cs2</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.kipr.ks2</string>
+	<string>com.kipr.cs2</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSHighResolutionCapable</key>
