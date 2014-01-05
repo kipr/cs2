@@ -613,7 +613,7 @@ void MainWindow::updateAdvert()
 
 int MainWindow::unfixPort(int port)
 {
-  return port ^ (~port & 1);
+  return port ^ 1;
 }
 
 void MainWindow::reset()
