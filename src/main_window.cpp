@@ -415,7 +415,7 @@ void MainWindow::update()
     foreach(const int port, leftBumpKeys) setDigital(port, leftBump);
   }
   
-  if(rightBumpKeys.isEmpty()) {
+  if(!rightBumpKeys.isEmpty()) {
     const unsigned rightRange = m_robot->rightRange() / m_robot->rangeLength() * 1023.0;
     const bool rightBump = rightRange < 150;
     foreach(const int port, rightBumpKeys) setDigital(port, rightBump);
