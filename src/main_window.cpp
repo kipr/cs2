@@ -788,9 +788,9 @@ void MainWindow::selectArchive(const QString &name)
 
 void MainWindow::about()
 {
-  QMessageBox::information(this, tr("About cs2"), tr("Version %1.%2\nCopyright 2013 KISS"
+  QMessageBox::information(this, tr("About cs2"), tr("Version %1.%2.%3\nCopyright 2013 KISS"
     " Institute for Practical Robotics")
-    .arg(CS2_VERSION_MAJOR).arg(CS2_VERSION_MINOR));
+    .arg(CS2_VERSION_MAJOR).arg(CS2_VERSION_MINOR).arg(CS2_VERSION_BUILD));
 }
 
 void MainWindow::processStarted()
