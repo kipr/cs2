@@ -159,6 +159,8 @@ MainWindow::MainWindow(State startingState, QWidget *parent)
     SLOT(textChanged(::Button::Type::Id, QString)));
 
   ui->actionStop->setEnabled(false);
+  ui->run->setEnabled(false);
+  ui->remove->setEnabled(false);
   
   _boardFileManager.addLocation(QDir::currentPath());
   _boardFileManager.reload();
