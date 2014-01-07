@@ -38,6 +38,7 @@
 #include "archives_model.hpp"
 #include <kovan/camera.hpp>
 #include "quser_info.hpp"
+#include "vision_dialog.hpp"
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -136,6 +137,7 @@ MainWindow::MainWindow(State startingState, QWidget *parent)
   connect(ui->remove, SIGNAL(clicked()), SLOT(remove()));
   connect(ui->actionStop, SIGNAL(triggered()), SLOT(stop()));
   connect(ui->actionReset, SIGNAL(triggered()), SLOT(reset()));
+  connect(ui->actionVision, SIGNAL(triggered()), SLOT(vision()));
   connect(ui->actionQuit, SIGNAL(triggered()), QCoreApplication::instance(), SLOT(quit()));
   connect(ui->portConfig, SIGNAL(clicked()), SLOT(configPorts()));
   connect(ui->selectBoard, SIGNAL(clicked()), SLOT(selectBoard()));
@@ -626,6 +628,12 @@ void MainWindow::reset()
 void MainWindow::settings()
 {
 	if(m_settingsDialog.exec()) updateSettings();
+}
+
+void MainWindow::vision()
+{
+  VisionDialog dialog(this);
+  if(dialog.exec() != QDialog::Accepted) return;
 }
 
 void MainWindow::setDigital(int port, bool on)

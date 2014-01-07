@@ -112,6 +112,8 @@
     </property>
     <addaction name="actionStop"/>
     <addaction name="actionReset"/>
+    <addaction name="separator"/>
+    <addaction name="actionVision"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -895,6 +897,15 @@
    </property>
    <property name="menuRole">
     <enum>QAction::PreferencesRole</enum>
+   </property>
+  </action>
+  <action name="actionVision">
+   <property name="icon">
+    <iconset resource="../rc/icons.qrc">
+     <normaloff>:/icons/webcam.png</normaloff>:/icons/webcam.png</iconset>
+   </property>
+   <property name="text">
+    <string>Vision</string>
    </property>
   </action>
  </widget>

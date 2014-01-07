@@ -76,6 +76,7 @@ private slots:
 	void update();
 	void reset();
   void settings();
+  void vision();
 	
 	void run(const QString &executable, const QString &id);
   void run();
