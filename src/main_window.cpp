@@ -165,16 +165,15 @@ MainWindow::MainWindow(State startingState, QWidget *parent)
 
   updateAdvert();
   updateSettings();
+  
   connect(_simulatorServer, SIGNAL(installFinished(const QString &)), this, SLOT(selectArchive(const QString &)));
   connect(_computerServer, SIGNAL(installFinished(const QString &)), this, SLOT(selectArchive(const QString &)));
   
+  setBoard(_boardFileManager.lookupBoardFile(defaultBoard()));
   setState(startingState);
   
   ui->console->setProcessOutputBuffer(_processOutputBuffer);
   ui->linkConsole->setProcessOutputBuffer(_processOutputBuffer);
-  
-  if(_archivesModel->rowCount() > 0) ui->programs->setCurrentIndex(_archivesModel->index(0, 0));
-  else setBoard(_boardFileManager.lookupBoardFile(defaultBoard()));
 }
 
 MainWindow::~MainWindow()
