@@ -77,8 +77,6 @@ private slots:
 	void reset();
   void settings();
 	
-	void finished(int exitCode);
-	
 	void run(const QString &executable, const QString &id);
   void run();
   void remove();

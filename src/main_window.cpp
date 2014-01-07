@@ -461,13 +461,6 @@ void MainWindow::update()
   ui->sim->update();
 }
 
-
-void MainWindow::finished(int exitCode)
-{
-  ui->actionStop->setEnabled(false);
-  stop();
-}
-
 void MainWindow::run(const QString &executable, const QString &id)
 {
   stop();
@@ -527,7 +520,6 @@ void MainWindow::stop()
   m_process->waitForFinished();
   delete m_process;
   m_process = 0;
-  ui->actionStop->setEnabled(false);
   m_kmod->reset();
 }
 
