@@ -10,8 +10,6 @@ ProcessOutputBuffer::ProcessOutputBuffer(QObject *const parent)
 
 void ProcessOutputBuffer::setProcess(QProcess *const process)
 {
-  _output.clear();
-  Q_EMIT outputChanged();
   if(_process) _process->disconnect(this);
   _process = process;
   if(!_process) return;

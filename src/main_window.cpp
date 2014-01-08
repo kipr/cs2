@@ -117,7 +117,6 @@ MainWindow::MainWindow(State startingState, QWidget *parent)
   }
 
   connect(_timer, SIGNAL(timeout()), SLOT(update()));
-  _timer->start(50);
 
   connect(ui->a, SIGNAL(pressed()), SLOT(buttonPressed()));
   connect(ui->b, SIGNAL(pressed()), SLOT(buttonPressed()));
@@ -198,8 +197,14 @@ void MainWindow::setState(const State state)
   ui->actionZoomIn->setEnabled(state == MainWindow::Computer);
   ui->actionZoomOut->setEnabled(state == MainWindow::Computer);
   switch(_state) {
-    case MainWindow::Computer: setWindowTitle(tr("My Computer")); break;
-    case MainWindow::Simulator: setWindowTitle(tr("Link 2D Simulator")); break;
+    case MainWindow::Computer:
+      setWindowTitle(tr("My Computer"));
+      _timer->stop();
+      break;
+    case MainWindow::Simulator:
+      setWindowTitle(tr("Link 2D Simulator"));
+      _timer->start(50);
+      break;
   }
   
 }
@@ -468,8 +473,9 @@ void MainWindow::update()
 void MainWindow::run(const QString &executable, const QString &id)
 {
   stop();
-  
   setState(id);
+  ui->linkConsole->clear();
+  ui->console->clear();
   
   m_process = new QProcess();
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -516,17 +522,18 @@ void MainWindow::run(const QString &executable, const QString &id)
 
 void MainWindow::stop()
 {
+  if(!m_process) return;
   ui->actionStop->setEnabled(false);
   if(ui->console->isVisible()) {
 	  const int msecs = _time.elapsed();
 	  _time.restart();
 	  ui->console->append(tr("\nFinished at %1 in %2 seconds").arg(_time.toString()).arg(msecs / 1000.0));
   }
+  else update();
   
-  update();
-  if(!m_process) return;
   _processOutputBuffer->setProcess(0);
-
+  
+  disconnect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(stop()));
   m_process->kill();
   m_process->waitForFinished();
   delete m_process;
