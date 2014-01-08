@@ -28,6 +28,11 @@ TouchDial::~TouchDial()
 void TouchDial::setMinimumValue(const double &minimumValue)
 {
 	m_minimumValue = minimumValue;
+  if(m_value < m_minimumValue) {
+    m_value = m_minimumValue;
+    emit valueChanged(m_value);
+  }
+  updateDial();
 }
 
 const double &TouchDial::minimumValue() const
@@ -38,6 +43,10 @@ const double &TouchDial::minimumValue() const
 void TouchDial::setMaximumValue(const double &maximumValue)
 {
 	m_maximumValue = maximumValue;
+  if(m_value > m_maximumValue) {
+    m_value = m_maximumValue;
+    emit valueChanged(m_value);
+  }
 	updateDial();
 }
 
@@ -48,6 +57,7 @@ const double &TouchDial::maximumValue() const
 
 void TouchDial::setValue(const double &value)
 {
+  if(m_value == value) return;
 	m_value = value;
 	if(m_value < m_minimumValue) m_value = m_minimumValue;
 	if(m_value > m_maximumValue) m_value = m_maximumValue;
@@ -201,4 +211,6 @@ void TouchDial::updateDial()
 	p.drawLine(xoff + r, yoff + r, xoff + r * (1 + cos(angle)), yoff + r * (1 + sin(angle)));
 	p.setPen(QPen(Qt::white, r / 20));
 	p.drawEllipse(QPoint(xoff + r, yoff + r), r / 4, r / 4);
+  
+  update();
 }
