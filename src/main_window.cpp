@@ -498,7 +498,7 @@ void MainWindow::run(const QString &executable, const QString &id)
 
   m_process->setProcessEnvironment(env);
   m_process->setWorkingDirectory(_workingDirectory.path());
-  connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished()));
+  connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(stop()));
 
   m_process->start(root.bin(executable).filePath(executable), QStringList());
   _processOutputBuffer->setProcess(m_process);
@@ -516,6 +516,13 @@ void MainWindow::run(const QString &executable, const QString &id)
 
 void MainWindow::stop()
 {
+  ui->actionStop->setEnabled(false);
+  if(ui->console->isVisible()) {
+	  const int msecs = _time.elapsed();
+	  _time.restart();
+	  ui->console->append(tr("\nFinished at %1 in %2 seconds").arg(_time.toString()).arg(msecs / 1000.0));
+  }
+  
   update();
   if(!m_process) return;
   _processOutputBuffer->setProcess(0);
@@ -800,16 +807,6 @@ void MainWindow::processStarted()
   if(ui->console->isVisible()) {
     _time.restart();
     ui->console->append(tr("Started at %1\n\n").arg(_time.toString()));
-  }
-}
-
-void MainWindow::processFinished()
-{
-  ui->actionStop->setEnabled(false);
-  if(ui->console->isVisible()) {
-	  const int msecs = _time.elapsed();
-	  _time.restart();
-	  ui->console->append(tr("\nFinished at %1 in %2 seconds").arg(_time.toString()).arg(msecs / 1000.0));
   }
 }
 

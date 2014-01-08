@@ -96,7 +96,6 @@ private slots:
   void about();
   
   void processStarted();
-  void processFinished();
   
   void selectArchive(const QString &name);
 	
