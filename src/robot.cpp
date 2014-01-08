@@ -244,7 +244,7 @@ void Robot::update()
 	double dl = sec * m_leftSpeed * m_wheelRadii * 2.0 * M_PI;
 	double dr = sec * m_rightSpeed * m_wheelRadii * 2.0 * M_PI;
 	double dd = (dl + dr) / 2.0;
-	m_robot->setRotation((theta + (dr - dl) / m_wheelDiameter) * 180.0 / M_PI);
+	m_robot->setRotation((theta + (dl - dr) / m_wheelDiameter) * 180.0 / M_PI);
 	m_leftTravelDistance += dl;
 	m_rightTravelDistance += dr;
 
