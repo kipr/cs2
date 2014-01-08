@@ -328,7 +328,7 @@ void MainWindow::update()
     const int port = unfixPort(i);
     Q_FOREACH(const int p, _motors.keys(0)) if(port == p) pos_err = pos_goal - MOTOR_SCALE
       * (int)m_robot->leftTravelDistance();
-    Q_FOREACH(const int p, _motors.keys(0)) if(port == p) pos_err = pos_goal - MOTOR_SCALE
+    Q_FOREACH(const int p, _motors.keys(1)) if(port == p) pos_err = pos_goal - MOTOR_SCALE
       * (int)m_robot->rightTravelDistance();
 
     int desired_speed = s.t[(GOAL_SPEED_0_HIGH + i)] << 16 | s.t[(GOAL_SPEED_0_LOW + i)];
