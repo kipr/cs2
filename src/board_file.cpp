@@ -40,8 +40,9 @@ void BoardFile::parse(const QStringList &lines, QGraphicsScene *scene)
 	double unitMult = 1.0;
 	foreach(const QString &line, lines) {
 		++lineNum;
-		if(line.trimmed().startsWith("#")) continue;
 		QStringList parts = line.split(" ", QString::SkipEmptyParts);
+    if(parts.size() == 0) continue;
+    if(parts[0].startsWith("#")) continue;
 		quint16 args = parts.size() - 1;
 		if(parts[0] == "line") {
 			if(args != 4) {
