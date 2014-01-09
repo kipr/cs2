@@ -1,0 +1,67 @@
+set-units in
+
+pen white 1
+brush white
+
+set-z -1.0
+
+# floor
+dec-rect 0 0 110.75 95.75 
+
+set-z 1.0
+
+# PVC top
+pen #808090 3
+line 7.5 0  102 0 
+line 84.5 7.5 102 7.5
+line 84.5 0 84.5 7.5
+line 102 0 102 7.5
+line 45 0 45 16.5
+
+pen green 5
+set-z 0
+tape 82.5 0 82.5 9.5
+tape 82.5 9.5 102 9.5
+pen black 5
+tape 7.5 33 53.25 33
+tape 56 61 102 61
+tape 48 47 61.5 47
+pen red 5
+tape 7.5 85 27 85
+tape 27 85 27 94
+pen black 3
+tape 7.5 33 7.5 44
+tape 102 50 102 61.5
+
+pen gainsboro 1
+dec-line 7.5 16.5 45 16.5
+dec-line 54.75 0 54.75 94.5
+dec-line 64.5 78 102 78
+
+set-z 1
+#PVC Left
+pen #808090 3
+line 7.5 0  7.5 33
+line 7.5 44 7.5 94.5
+line 0 16.5  0 44
+line 0 16.5 7.5 16.5
+line 0 33 7.5 33
+line 0 44 7.5 44
+line 7.5 47 48 47
+
+#PVC bottom
+line 7.5 94.5 102 94.5
+line 7.5 87 25 87
+line 25 87 25 94.5
+line 64.5 78 64.5 94.5
+
+
+#PVC right
+line 102 0 102 50
+line 102 61.5 102 94.5
+line 102 78 109.5 78
+line 102 61.5 109.5 61.5
+line 102 50 109.5 50
+line 109.5 50 109.5 78
+line 61.5 47 102 47
+

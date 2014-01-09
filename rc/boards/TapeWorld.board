@@ -1,0 +1,37 @@
+set-units in
+
+pen white 1
+brush white
+
+set-z -1.0
+
+# floor
+dec-rect 0 0 110.75 95.75 
+
+set-z 1.0
+
+# PVC top
+pen #808090 3
+line 0 0  109.5 0 
+line 0 94.5 109.5 94.5 
+line 0 0 0 94.5
+line 109.5 0 109.5 94.5
+
+#PVC U
+line 40 20 40 55
+line 40 55 60 55
+line 60 55 60 20
+
+#Tape
+set-z 0
+pen black 5
+tape 40 20 60 20
+tape 20 10 25 50
+tape 25 50 15 70
+tape 15 70 20 75
+tape 20 75 30 80
+tape 30 80 60 85
+tape 60 85 70 75
+tape 70 75 80 50
+tape 80 50 95 30
+tape 95 30 85 5

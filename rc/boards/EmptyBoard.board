@@ -1,0 +1,20 @@
+set-units in
+
+pen white 1
+brush white
+
+set-z -1.0
+
+# floor
+dec-rect 0 0 110.75 95.75 
+
+set-z 1.0
+
+# PVC top
+pen #808090 3
+line 0 0  109.5 0 
+line 0 94.5 109.5 94.5 
+line 0 0 0 94.5
+line 109.5 0 109.5 94.5
+
+

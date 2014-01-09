@@ -776,7 +776,7 @@ QString MainWindow::defaultBoard()
 {
   QSettings settings;
   settings.beginGroup(BOARD);
-  const QString ret = settings.value(DEFAULT_BOARD, "2013").toString();
+  const QString ret = settings.value(DEFAULT_BOARD, "2014").toString();
   settings.endGroup();
   
   return ret;

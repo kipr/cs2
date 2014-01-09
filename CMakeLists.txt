@@ -9,6 +9,7 @@ set(INCLUDE ${CMAKE_SOURCE_DIR}/include)
 set(SRC ${CMAKE_SOURCE_DIR}/src)
 set(UI ${CMAKE_SOURCE_DIR}/ui)
 set(RC ${CMAKE_SOURCE_DIR}/rc)
+set(BOARD ${RC}/boards)
 
 include_directories(${INCLUDE} ${CMAKE_BINARY_DIR})
 
@@ -16,6 +17,7 @@ file(GLOB INCLUDES ${INCLUDE}/*.hpp)
 file(GLOB SOURCES ${SRC}/*.cpp)
 file(GLOB UIS ${UI}/*.ui)
 file(GLOB RCS ${RC}/*.qrc)
+file(GLOB BOARDS ${BOARD}/*.board)
 
 qt5_wrap_cpp(SOURCES ${INCLUDES})
 qt5_wrap_ui(SOURCES ${UIS})
@@ -71,10 +73,10 @@ macro(copy_files NAME FILES DESTINATION)
 endmacro(copy_files)
 
 IF(APPLE)
-	copy_files(board ${RC}/2013.board ${CMAKE_SOURCE_DIR}/deploy/cs2.app/Contents/)
+	copy_files(board "${BOARDS}" ${CMAKE_SOURCE_DIR}/deploy/cs2.app/Contents/)
 	copy_files(platform.hints ${RC}/platform.hints ${CMAKE_SOURCE_DIR}/deploy/cs2.app/Contents)
 ELSE(APPLE)
-	copy_files(board ${RC}/2013.board ${CMAKE_SOURCE_DIR}/deploy/)
+	copy_files(board "${BOARDS}" ${CMAKE_SOURCE_DIR}/deploy/)
 	copy_files(platform.hints ${RC}/platform.hints ${CMAKE_SOURCE_DIR}/deploy)
 ENDIF(APPLE)
 
