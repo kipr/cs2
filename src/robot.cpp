@@ -323,7 +323,7 @@ double Robot::reflectanceReading(double sensorX, double sensorY)
 
 		QRectF r(QPoint(spiralX, spiralY), QSize(1,1));
 
-		QList<QGraphicsItem *> items = scene->items(r, Qt::IntersectsItemBoundingRect, Qt::AscendingOrder);
+		QList<QGraphicsItem *> items = scene->items(r, Qt::IntersectsItemShape, Qt::AscendingOrder);
 		foreach(QGraphicsItem *t, items) {
 			if(t->data(0) == BoardFile::Tape) {
 				result += weight;
@@ -352,7 +352,7 @@ QLineF Robot::intersectDistance(QGraphicsLineItem *item, const double &baseAngle
 	if(ys == 0.0) ys = 0.0001;
 	for(double i = 0; i < m_rangeLength; i += 1.0) {
 		QRectF r(m_robot->x() + i * xs, m_robot->y() + i * ys, xs, ys);
-		QList<QGraphicsItem *> items = scene->items(r, Qt::IntersectsItemBoundingRect, Qt::AscendingOrder);
+		QList<QGraphicsItem *> items = scene->items(r, Qt::IntersectsItemShape, Qt::AscendingOrder);
 		foreach(QGraphicsItem *t, items) {
 			if(t->data(0) == BoardFile::Real) {
 				line.setLength(i);
