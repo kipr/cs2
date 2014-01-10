@@ -23,12 +23,19 @@
 #include "board_file_manager.hpp"
 #include "board_selector_dialog.hpp"
 
+#ifdef Q_OS_MAC
+  void disablePowerNap();
+#endif
+
 #ifdef _MSC_VER
 #pragma comment(linker, "/ENTRY:mainCRTStartup")
 #endif
 
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_MAC
+  disablePowerNap();
+#endif
 	QApplication app(argc, argv);
   
 	QApplication::setOrganizationName("KIPR");
