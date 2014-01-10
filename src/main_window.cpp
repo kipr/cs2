@@ -658,13 +658,10 @@ void MainWindow::vision()
 
 void MainWindow::depthSensor()
 {
-  QDialog *dialog = new QDialog();
-  DepthSensorWidget *w = new DepthSensorWidget(dialog);
-  dialog->setWindowTitle(tr("Depth Sensor"));
-  dialog->show();
-  dialog->raise();
-  dialog->activateWindow();
-  
+  QDialog dialog;
+  DepthSensorWidget w(&dialog);
+  dialog.setWindowTitle(tr("Depth Sensor"));
+  dialog.exec();
 }
 
 void MainWindow::setDigital(int port, bool on)
