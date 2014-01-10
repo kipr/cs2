@@ -1,4 +1,4 @@
-#include "channel_configurations_model.hpp"
+#include "vision_config_model.hpp"
 
 #include <QDir>
 #include <QFileIconProvider>
@@ -24,26 +24,26 @@ private:
 	QIcon m_icon;
 };
 
-ChannelConfigurationsModel::ChannelConfigurationsModel(QObject *parent)
+VisionConfigModel::VisionConfigModel(QObject *parent)
 	: QFileSystemModel(parent),
 	m_iconProvider(new FileIconProvider)
 {
 	setIconProvider(m_iconProvider);
 	const QString configPath = QString::fromStdString(Camera::ConfigPath::path());
-	qDebug() << configPath;
+	qDebug() << "Camera config path:" << configPath;
 	QDir().mkpath(configPath);
 	setNameFilters(QStringList() << ("*." + QString::fromStdString(Camera::ConfigPath::extension())));
 	setNameFilterDisables(false);
-	setFilter(QDir::NoDot | QDir::NoDotDot | QDir::Files);
+	setFilter(QDir::NoDotAndDotDot | QDir::Files);
 	setRootPath(configPath);
 }
 
-ChannelConfigurationsModel::~ChannelConfigurationsModel()
+VisionConfigModel::~VisionConfigModel()
 {
 	delete m_iconProvider;
 }
 
-QModelIndex ChannelConfigurationsModel::defaultConfiguration() const
+QModelIndex VisionConfigModel::defaultConfiguration() const
 {
 	return index(QString::fromStdString(Camera::ConfigPath::defaultConfigPath()));
 }

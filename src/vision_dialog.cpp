@@ -1,8 +1,8 @@
 #include "vision_dialog.hpp"
 #include "ui_vision_dialog.h"
 
-#include "channel_configurations_model.hpp"
-#include "camera_config_model.hpp"
+#include "vision_config_model.hpp"
+#include "vision_channel_model.hpp"
 #include "input_dialog.hpp"
 
 #include <kovan/camera.hpp>
@@ -27,7 +27,7 @@ public:
 	{
 		QItemDelegate::paint(painter, option, index);
 		VisionDialog *w = qobject_cast<VisionDialog *>(parent());
-		if(!w->isDefaultPath(index)) return;
+		if(!w->isDefaultConfig(index)) return;
 		const QPoint right = option.rect.topRight();
 		painter->drawPixmap(right.x() - 24, right.y() + option.rect.height() / 2 - 8,
 			16, 16, m_star);
@@ -45,7 +45,7 @@ private:
 class ChannelItemDelegate : public QItemDelegate
 {
 public:
-	ChannelItemDelegate(CameraConfigModel *model, QObject *parent = 0)
+	ChannelItemDelegate(VisionChannelModel *model, QObject *parent = 0)
 		: QItemDelegate(parent),
 		m_model(model),
 		m_hsv(QIcon(":/icons/color_wheel.png").pixmap(16, 16)),
@@ -69,38 +69,39 @@ public:
 	}
 	
 private:
-	CameraConfigModel *m_model;
+	VisionChannelModel *m_model;
 	QPixmap m_hsv;
 	QPixmap m_qr;
 };
 
+/* Keep? */
 VisionDialog::VisionDialog(QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::VisionDialog)
-	, m_configsModel(new ChannelConfigurationsModel(this))
-	, m_configModel(new CameraConfigModel(this))
+	, m_configModel(new VisionConfigModel(this))
+	, m_channelModel(new VisionChannelModel(this))
 	, m_device(new Camera::Device(new Camera::UsbInputProvider))
-	, m_ignoreNextConfigSave(false)
 {
 	ui->setupUi(this);
 	
-	ui->configs->setModel(m_configsModel);
-	ui->configs->setRootIndex(m_configsModel->index(m_configsModel->rootPath()));
-	ui->configs->setItemDelegate(new ConfigItemDelegate(this));
+	ui->configsList->setModel(m_configModel);
+	ui->configsList->setRootIndex(m_configModel->index(m_configModel->rootPath()));
+	ui->configsList->setItemDelegate(new ConfigItemDelegate(this));
 	
-	ui->channels->setModel(m_configModel);
-	ui->channels->setItemDelegate(new ChannelItemDelegate(m_configModel, this));
+	ui->channelsList->setModel(m_channelModel);
+	ui->channelsList->setItemDelegate(new ChannelItemDelegate(m_channelModel, this));
 	
 	connect(&m_cameraTimer, SIGNAL(timeout()), SLOT(updateCamera()));
 	m_cameraTimer.start(100);
 	
-	Config deviceConfig;
-	deviceConfig.beginGroup(CAMERA_GROUP);
-	deviceConfig.setValue(CAMERA_NUM_CHANNELS_KEY, 1);
-	deviceConfig.beginGroup((QString(CAMERA_CHANNEL_GROUP_PREFIX) + "0").toStdString());
-	deviceConfig.setValue(CAMERA_CHANNEL_TYPE_KEY, CAMERA_CHANNEL_TYPE_HSV_KEY);
-	deviceConfig.clearGroup();
-	m_device->setConfig(deviceConfig);
+  /* Need this? */
+	Config startConfig;
+	startConfig.beginGroup(CAMERA_GROUP);
+	startConfig.setValue(CAMERA_NUM_CHANNELS_KEY, 1);
+	startConfig.beginGroup((QString(CAMERA_CHANNEL_GROUP_PREFIX) + "0").toStdString());
+	startConfig.setValue(CAMERA_CHANNEL_TYPE_KEY, CAMERA_CHANNEL_TYPE_HSV_KEY);
+	startConfig.clearGroup();
+	m_device->setConfig(startConfig);
 	
 	connect(ui->_th, SIGNAL(textChanged(QString)), SLOT(manualEntry(QString)));
 	connect(ui->_ts, SIGNAL(textChanged(QString)), SLOT(manualEntry(QString)));
@@ -114,20 +115,130 @@ VisionDialog::VisionDialog(QWidget *parent)
 	
 	connect(ui->cv, SIGNAL(pressed(int, int)), SLOT(imagePressed(int, int)));
 	
-	connect(ui->channels->selectionModel(),
-		SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
-		SLOT(updateOptions(QItemSelection, QItemSelection)));
+	connect(ui->channelsList->selectionModel(),
+		SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
+		SLOT(currentChannelChanged(const QModelIndex &, const QModelIndex &)));
 	
-	connect(ui->configs->selectionModel(),
-		SIGNAL(currentChanged(QModelIndex, QModelIndex)),
-		SLOT(currentConfigChanged(QModelIndex, QModelIndex)));
+	connect(ui->configsList->selectionModel(),
+		SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
+		SLOT(currentConfigChanged(const QModelIndex &, const QModelIndex &)));
 		
-	m_defaultPath = m_configsModel->filePath(m_configsModel->defaultConfiguration());
+	m_defaultConfigPath = m_configModel->filePath(m_configModel->defaultConfiguration());
 }
 
 VisionDialog::~VisionDialog()
 {
 	delete m_device;
+}
+
+int VisionDialog::exec()
+{
+	if(!m_device->open()) return QDialog::Rejected;
+	const int ret = QDialog::exec();
+	m_device->close();
+	
+	const QModelIndex configIndex = ui->configsList->selectionModel()->currentIndex();
+	if(configIndex.isValid()) currentConfigChanged(QModelIndex(), configIndex);
+	
+	return ret;
+}
+
+void VisionDialog::setDefault(const QModelIndex &index)
+{
+  if(!index.isValid()) return;
+  const QModelIndex oldDefault = m_configModel->index(m_defaultConfigPath);
+  m_defaultConfigPath = m_configModel->filePath(index);
+  ui->defaultConfig->setEnabled(false);
+  Camera::ConfigPath::setDefaultConfigPath(QFileInfo(m_defaultConfigPath).baseName().toStdString());
+  ui->configsList->update(index);
+  if(oldDefault.isValid()) ui->configsList->update(oldDefault);
+}
+
+bool VisionDialog::isDefaultConfig(const QModelIndex &index) const
+{
+	return m_configModel->filePath(index) == m_defaultConfigPath;
+}
+
+void VisionDialog::on_addConfig_clicked()
+{  
+  // Get new configuration name from user
+  InputDialog input(this);
+  input.setKey(tr("New Configuration Name"));
+  input.setEmptyAllowed(false);
+  if(input.exec() != QDialog::Accepted) return;
+  
+  // Save new configuration
+  std::string savePath = Camera::ConfigPath::path(input.value().toStdString());
+  Config blank;
+  if(!blank.save(savePath)) return;
+  
+  setDefault(m_configModel->index(QString::fromStdString(savePath)));
+}
+
+void VisionDialog::on_removeConfig_clicked()
+{  
+  const QModelIndex index = ui->configsList->selectionModel()->currentIndex();
+  if(!index.isValid()) return;
+  if(!QFile::remove(m_configModel->filePath(index))) qDebug() << "Failed to remove file!";
+}
+
+void VisionDialog::on_duplicateConfig_clicked()
+{  
+  const QModelIndex index = ui->configsList->selectionModel()->currentIndex();
+  if(!index.isValid()) return;
+  
+  InputDialog input(this);
+  input.setKey(tr("Duplicate Configuration Name"));
+  input.setEmptyAllowed(false);
+  if(input.exec() != QDialog::Accepted) return;
+  
+  std::string savePath = Camera::ConfigPath::path(input.value().toStdString());
+  Config *config = Config::load(m_configModel->filePath(index).toStdString());
+  if(!config->save(savePath)) {
+    qWarning() << "Error saving" << QString::fromStdString(savePath);
+    return;
+  }
+}
+
+void VisionDialog::on_defaultConfig_clicked()
+{
+  const QModelIndex index = ui->configsList->selectionModel()->currentIndex();
+  if(!index.isValid()) return;
+  setDefault(index);
+}
+
+void VisionDialog::on_addChannel_clicked()
+{
+  m_channelModel->addChannel(CAMERA_CHANNEL_TYPE_HSV_KEY);
+}
+
+// TODO: this crashes if removing the first row
+void VisionDialog::on_removeChannel_clicked()
+{
+  const QModelIndex index = ui->configsList->selectionModel()->currentIndex();
+  if(!index.isValid()) return;
+  const int row = index.row();
+  m_channelModel->removeChannel(row);
+}
+
+void VisionDialog::on_up_clicked()
+{
+  const QModelIndex index = ui->configsList->selectionModel()->currentIndex();
+  if(!index.isValid()) return;
+  const int row = index.row();
+  if(row == 0) return;
+  
+  m_channelModel->swapChannels(row, row - 1);
+}
+
+void VisionDialog::on_down_clicked()
+{
+  const QModelIndex index = ui->configsList->selectionModel()->currentIndex();
+  if(!index.isValid()) return;
+  const int row = index.row();
+  if(row >= m_configModel->rowCount() - 1) return;
+  
+  m_channelModel->swapChannels(row, row + 1);
 }
 
 void VisionDialog::updateCamera()
@@ -168,146 +279,21 @@ void VisionDialog::updateCamera()
 	ui->cv->updateImage(image);
 }
 
-int VisionDialog::exec()
+void VisionDialog::visualChanged()
 {
-	if(!m_device->open()) return QDialog::Rejected;
+	if(!ui->hsv->isEnabled()) return;
 	
-	int ret = QDialog::exec();
-	m_device->close();
+	const QColor &max = ui->visual->max();
+	const QColor &min = ui->visual->min();
 	
-	QItemSelection selection = ui->configs->selectionModel()->selection();
-	if(selection.indexes().size())
-		currentConfigChanged(QModelIndex(), selection.indexes()[0]);
+	m_hsvConfig.setValue("th", max.hue() / 2);
+	m_hsvConfig.setValue("ts", max.saturation());
+	m_hsvConfig.setValue("tv", max.value());
+	m_hsvConfig.setValue("bh", min.hue() / 2);
+	m_hsvConfig.setValue("bs", min.saturation());
+	m_hsvConfig.setValue("bv", min.value());
 	
-	return ret;
-}
-
-void VisionDialog::on_addChannel_clicked()
-{
-	m_configModel->addChannel(CAMERA_CHANNEL_TYPE_HSV_KEY);
-}
-
-void VisionDialog::on_removeChannel_clicked()
-{
-	const QModelIndexList &indexes = ui->channels->selectionModel()
-		->selection().indexes();
-	if(indexes.size() != 1) return;
-	m_configModel->removeChannel(indexes[0].row());
-}
-
-void VisionDialog::on_up_clicked()
-{
-	QItemSelectionModel *selModel = ui->channels->selectionModel();
-	const QModelIndexList &indexes = selModel->selection().indexes();
-	if(indexes.size() != 1) return;
-	const int i = indexes[0].row();
-	if(i - 1 < 0) return;
-	m_configModel->swapChannels(i, i - 1);
-	selModel->clearSelection();
-	selModel->select(m_configModel->item(i - 1)->index(),
-		QItemSelectionModel::Select);
-}
-
-void VisionDialog::on_down_clicked()
-{
-	QItemSelectionModel *selModel = ui->channels->selectionModel();
-	const QModelIndexList &indexes = selModel->selection().indexes();
-	if(indexes.size() != 1) return;
-	const int i = indexes[0].row();
-	if(i + 1 >= m_configModel->rowCount()) return;
-	m_configModel->swapChannels(i, i + 1);
-	selModel->clearSelection();
-	selModel->select(m_configModel->item(i + 1)->index(),
-		QItemSelectionModel::Select);
-}
-
-void VisionDialog::updateOptions(const QItemSelection &current, const QItemSelection &prev)
-{
-    if(prev.indexes().size()) {
-        QModelIndex p = prev.indexes()[0];
-        Config c = m_configModel->config();
-        c.beginGroup(CAMERA_GROUP);
-        c.beginGroup(CAMERA_CHANNEL_GROUP_PREFIX + QString::number(p.row()).toStdString());
-        c.addValues(m_hsvConfig);
-        const int row = current.indexes().size() == 1 ? current.indexes()[0].row() : -1;
-        m_configModel->setConfig(c);
-        if(row >= 0) {
-            ui->channels->selectionModel()->select(m_configModel->index(row, 0), QItemSelectionModel::Select);
-        }
-    }
-    
-    const QModelIndexList &indexes = current.indexes();
-    const bool enable = ui->channels->isEnabled();
-    const bool sel = indexes.size() == 1 && enable;
-    ui->addChannel->setEnabled(enable);
-    ui->removeChannel->setEnabled(sel);
-    ui->up->setEnabled(sel && indexes[0].row() > 0);
-    ui->down->setEnabled(sel && indexes[0].row() + 1 < m_configModel->rowCount());
-    ui->hsv->setEnabled(sel);
-    
-	if(indexes.size()) {
-		Config c = m_configModel->config();
-		c.beginGroup(CAMERA_GROUP);
-		c.beginGroup((CAMERA_CHANNEL_GROUP_PREFIX + QString::number(indexes[0].row()))
-			.toStdString());
-		m_hsvConfig = c.values();
-	}
 	refreshHsv();
-}
-
-void VisionDialog::refreshHsv()
-{
-	if(!ui->hsv->isEnabled()) {
-		ui->_th->setText(QString());
-		ui->_ts->setText(QString());
-		ui->_tv->setText(QString());
-		ui->_bh->setText(QString());
-		ui->_bs->setText(QString());
-		ui->_bv->setText(QString());
-		return;
-	}
-	
-	int th = m_hsvConfig.intValue("th") * 2;
-	int ts = m_hsvConfig.intValue("ts");
-	int tv = m_hsvConfig.intValue("tv");
-	int bh = m_hsvConfig.intValue("bh") * 2;
-	int bs = m_hsvConfig.intValue("bs");
-	int bv = m_hsvConfig.intValue("bv");
-
-	if(th == bh) {
-		th += 5;
-		th %= 360;
-		bh -= 5;
-		if(bh < 0) bh += 360;
-	}
-	
-	if(ts == bs) {
-		ts += 5;
-		ts = ts > 255 ? 255 : ts;
-		bs -= 5;
-		bs = bs < 0 ? 0 : bs;
-	}
-	
-	if(tv == bv) {
-		tv += 5;
-		tv = tv > 255 ? 255 : tv;
-		bv -= 5;
-		bv = bv < 0 ? 0 : bv;
-	}
-	
-	// Visual
-	ui->visual->setMax(QColor::fromHsv(th, ts, tv));
-	ui->visual->setMin(QColor::fromHsv(bh, bs, bv));
-	
-	// Manual
-	ui->_th->setText(QString::number(th));
-	ui->_ts->setText(QString::number(ts));
-	ui->_tv->setText(QString::number(tv));
-	ui->_bh->setText(QString::number(bh));
-	ui->_bs->setText(QString::number(bs));
-	ui->_bv->setText(QString::number(bv));
-	
-	m_device->channels()[0]->setConfig(m_hsvConfig);
 }
 
 void VisionDialog::manualEntry(const QString &number)
@@ -332,28 +318,7 @@ void VisionDialog::manualEntry(const QString &number)
 		m_hsvConfig.setValue("bv", qMin(num, 255));
 	}
 	
-	blockChildSignals(true);
 	refreshHsv();
-	blockChildSignals(false);
-}
-
-void VisionDialog::visualChanged()
-{
-	if(!ui->hsv->isEnabled()) return;
-	
-	const QColor &max = ui->visual->max();
-	const QColor &min = ui->visual->min();
-	
-	m_hsvConfig.setValue("th", max.hue() / 2);
-	m_hsvConfig.setValue("ts", max.saturation());
-	m_hsvConfig.setValue("tv", max.value());
-	m_hsvConfig.setValue("bh", min.hue() / 2);
-	m_hsvConfig.setValue("bs", min.saturation());
-	m_hsvConfig.setValue("bv", min.value());
-	
-	blockChildSignals(true);
-	refreshHsv();
-	blockChildSignals(false);
 }
 
 void VisionDialog::imagePressed(const int x, const int y)
@@ -387,11 +352,131 @@ void VisionDialog::imagePressed(const int x, const int y)
 	m_hsvConfig.setValue("bs", bs);
 	m_hsvConfig.setValue("bv", bv);
 	
-	blockChildSignals(true);
 	refreshHsv();
+}
+
+void VisionDialog::currentConfigChanged(const QModelIndex &current, const QModelIndex &prev)
+{  
+  const bool currentValid = current.isValid();
+  const bool prevValid = prev.isValid();
+  
+  // Save the previously selected config (if exists) in file
+  if(prevValid) {
+    const std::string path = Camera::ConfigPath::path(m_configModel->fileInfo(prev).baseName().toStdString());
+    if(QFile::exists(QString::fromStdString(path)))
+      m_channelModel->config().save(path);
+  }
+  
+  // Update interface
+  ui->channelsList->selectionModel()->clear();
+  ui->removeConfig->setEnabled(currentValid);
+  ui->duplicateConfig->setEnabled(currentValid);
+  ui->defaultConfig->setEnabled(currentValid && !isDefaultConfig(current));
+  ui->addChannel->setEnabled(currentValid);
+  ui->addChannel->setEnabled(currentValid);
+  ui->channelsList->setEnabled(currentValid);
+  
+  // Load and set newly selected config
+  if(currentValid) {
+    Config *config = Config::load(Camera::ConfigPath::path(m_configModel->fileInfo(current).baseName().toStdString()));
+    if(config) m_channelModel->setConfig(*config, true);
+    delete config;
+  }
+  else m_channelModel->setConfig(Config(), true);
+}
+
+void VisionDialog::currentChannelChanged(const QModelIndex &current, const QModelIndex &prev)
+{
+  const bool currentValid = current.isValid();
+  
+  // Update interface
+  ui->hsv->setEnabled(currentValid);
+  ui->removeChannel->setEnabled(currentValid);
+  //ui->up->setEnabled(currentValid && current.row() > 0);
+  //ui->down->setEnabled(currentValid && current.row() < m_channelModel->rowCount() - 1);
+  
+  if(currentValid) {
+    Config c = m_channelModel->config();
+    c.clearGroup();
+    c.beginGroup(CAMERA_GROUP);
+    c.beginGroup((CAMERA_CHANNEL_GROUP_PREFIX + QString::number(current.row())).toStdString());
+    m_hsvConfig = c.values();
+  }
+  
+  refreshHsv();
+}
+
+void VisionDialog::refreshHsv()
+{
+	blockChildSignals(true);
+  
+	if(!ui->hsv->isEnabled()) {
+		ui->_th->setText(QString());
+		ui->_ts->setText(QString());
+		ui->_tv->setText(QString());
+		ui->_bh->setText(QString());
+		ui->_bs->setText(QString());
+		ui->_bv->setText(QString());
+		return;
+	}
+	
+  // Get the current hsv values
+	int th = m_hsvConfig.intValue("th") * 2;
+	int ts = m_hsvConfig.intValue("ts");
+	int tv = m_hsvConfig.intValue("tv");
+	int bh = m_hsvConfig.intValue("bh") * 2;
+	int bs = m_hsvConfig.intValue("bs");
+	int bv = m_hsvConfig.intValue("bv");
+
+  // Force top and bottom to be different
+	if(th == bh) {
+		th += 5;
+		th %= 360;
+		bh -= 5;
+		if(bh < 0) bh += 360;
+	}
+	
+	if(ts == bs) {
+		ts += 5;
+		ts = ts > 255 ? 255 : ts;
+		bs -= 5;
+		bs = bs < 0 ? 0 : bs;
+	}
+	
+	if(tv == bv) {
+		tv += 5;
+		tv = tv > 255 ? 255 : tv;
+		bv -= 5;
+		bv = bv < 0 ? 0 : bv;
+	}
+	
+	// Update the hsv visual widget
+	ui->visual->setMax(QColor::fromHsv(th, ts, tv));
+	ui->visual->setMin(QColor::fromHsv(bh, bs, bv));
+	
+	// Update the hsv text fields
+	ui->_th->setText(QString::number(th));
+	ui->_ts->setText(QString::number(ts));
+	ui->_tv->setText(QString::number(tv));
+	ui->_bh->setText(QString::number(bh));
+	ui->_bs->setText(QString::number(bs));
+	ui->_bv->setText(QString::number(bv));
+	
+	m_device->channels()[0]->setConfig(m_hsvConfig);
+  
+  // Update the channel within the config
+  const QModelIndex current = ui->channelsList->selectionModel()->currentIndex();
+  Config c = m_channelModel->config();
+  c.clearGroup();
+  c.beginGroup(CAMERA_GROUP);
+  c.beginGroup(CAMERA_CHANNEL_GROUP_PREFIX + QString::number(current.row()).toStdString());
+  c.addValues(m_hsvConfig);
+  m_channelModel->setConfig(c);
+  
 	blockChildSignals(false);
 }
 
+/* Keep? */
 void VisionDialog::blockChildSignals(const bool block)
 {
 	ui->_th->blockSignals(block);
@@ -401,105 +486,4 @@ void VisionDialog::blockChildSignals(const bool block)
 	ui->_bs->blockSignals(block);
 	ui->_bv->blockSignals(block);
 	ui->visual->blockSignals(block);
-}
-
-bool VisionDialog::isDefaultPath(const QModelIndex &index) const
-{
-	return m_configsModel->filePath(index) == m_defaultPath;
-}
-
-void VisionDialog::on_renameConfig_clicked()
-{
-	QItemSelection selection = ui->configs->selectionModel()->selection();
-	if(selection.indexes().size() != 1) return;
-	QModelIndex index = selection.indexes()[0];
-	
-	QFileInfo file = m_configsModel->fileInfo(index);
-	
-	InputDialog input(this);
-	input.setKey(tr("Configuration Name"));
-	input.setValue(file.baseName());
-	input.setEmptyAllowed(false);
-	if(input.exec() != QDialog::Accepted) return;
-	
-	// Forgive me, programming gods
-	m_ignoreNextConfigSave = true;
-	if(!QFile::rename(file.filePath(),
-		file.path() + "/" + input.value() + "." + file.completeSuffix())) {
-		qWarning() << "Failed to change name";
-	}
-}
-
-void VisionDialog::on_defaultConfig_clicked()
-{
-	QItemSelection selection = ui->configs->selectionModel()->selection();
-	if(selection.indexes().size() != 1) return;
-	
-	QModelIndex index = selection.indexes()[0];
-	m_defaultPath = m_configsModel->filePath(index);
-	ui->defaultConfig->setEnabled(false);
-	Camera::ConfigPath::setDefaultConfigPath(m_configsModel->fileInfo(index)
-		.baseName().toStdString());
-	ui->configs->repaint();
-}
-
-void VisionDialog::on_addConfig_clicked()
-{
-	InputDialog input(this);
-	input.setKey(tr("Configuration Name"));
-	input.setEmptyAllowed(false);
-	if(input.exec() != QDialog::Accepted) return;
-	
-	Config blank;
-	std::string savePath = Camera::ConfigPath::path(input.value().toStdString());
-	QString qSavePath = QString::fromStdString(savePath);
-	if(!blank.save(savePath)) {
-		qWarning() << "Error saving" << qSavePath;
-		return;
-	}
-	
-	// Select it and set as default if it's the first one
-	QDir saves = QDir(QFileInfo(qSavePath).path(), "*." + QString::fromStdString(
-		Camera::ConfigPath::extension()));
-	if(saves.entryList(QDir::Files).size() == 1) {
-		QModelIndex index = m_configsModel->index(qSavePath);
-		ui->configs->selectionModel()->select(index, QItemSelectionModel::Select);
-		on_defaultConfig_clicked();
-		currentConfigChanged(index, QModelIndex());
-	}
-}
-
-void VisionDialog::on_removeConfig_clicked()
-{
-	QItemSelection selection = ui->configs->selectionModel()->selection();
-	if(selection.indexes().size() != 1) return;
-	// Forgive me, programming gods
-	m_ignoreNextConfigSave = true;
-	QFile::remove(m_configsModel->filePath(selection.indexes()[0]));
-}
-
-void VisionDialog::currentConfigChanged(const QModelIndex &current, const QModelIndex &prev)
-{
-	if(prev.isValid() && !m_ignoreNextConfigSave) {
-		const Config c = m_configModel->config();
-		c.save(Camera::ConfigPath::path(m_configsModel->fileInfo(prev)
-					.baseName().toStdString()));
-		m_ignoreNextConfigSave = false;
-	}
-	
-	const bool enable = current.isValid();
-	ui->renameConfig->setEnabled(enable);
-	ui->defaultConfig->setEnabled(enable && !isDefaultPath(current));
-	ui->removeConfig->setEnabled(enable);
-	ui->channels->setEnabled(enable);
-	if(enable) {
-		Config *config = Config::load(Camera::ConfigPath::path(m_configsModel->fileInfo(current)
-			.baseName().toStdString()));
-		if(config) m_configModel->setConfig(*config);
-		delete config;
-	} else {
-		m_configModel->setConfig(Config());
-	}
-	
-	updateOptions(QItemSelection(), ui->channels->selectionModel()->selection());
 }

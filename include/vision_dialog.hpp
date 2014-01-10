@@ -18,8 +18,8 @@ namespace Camera
 	class Device;
 }
 
-class ChannelConfigurationsModel;
-class CameraConfigModel;
+class VisionConfigModel;
+class VisionChannelModel;
 
 class VisionDialog : public QDialog
 {
@@ -29,12 +29,13 @@ public:
 	~VisionDialog();
 	
 	virtual int exec();
-	bool isDefaultPath(const QModelIndex &index) const;
+  void setDefault(const QModelIndex &index);
+	bool isDefaultConfig(const QModelIndex &index) const;
 	
 private Q_SLOTS:
 	void on_addConfig_clicked();
 	void on_removeConfig_clicked();
-	void on_renameConfig_clicked();
+	void on_duplicateConfig_clicked();
 	void on_defaultConfig_clicked();
 	void on_addChannel_clicked();
 	void on_removeChannel_clicked();
@@ -42,28 +43,26 @@ private Q_SLOTS:
 	void on_down_clicked();
 	
 	void updateCamera();
+  void visualChanged();
 	void manualEntry(const QString &number);
-	void visualChanged();
 	void imagePressed(const int x, const int y);
 	
 	void currentConfigChanged(const QModelIndex &current, const QModelIndex &prev);
-	void updateOptions(const QItemSelection &current, const QItemSelection &prev);
+	void currentChannelChanged(const QModelIndex &current, const QModelIndex &prev);
 	
 private:
 	void refreshHsv();
 	void blockChildSignals(const bool block);
 	
-	ChannelConfigurationsModel *m_configsModel;
-	CameraConfigModel *m_configModel;
-	
-	Ui::VisionDialog *ui;
-	QTimer m_cameraTimer;
-	
+  Ui::VisionDialog *ui;
+	VisionConfigModel *m_configModel;
+	VisionChannelModel *m_channelModel;
+  
 	Camera::Device *m_device;
 	Config m_hsvConfig;
-	QString m_defaultPath;
+	QString m_defaultConfigPath;
 	
-	bool m_ignoreNextConfigSave;
+	QTimer m_cameraTimer;
 };
 
 #endif

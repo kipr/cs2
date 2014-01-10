@@ -54,12 +54,9 @@
         </widget>
        </item>
        <item>
-        <widget class="QListView" name="configs">
+        <widget class="QListView" name="configsList">
          <property name="horizontalScrollBarPolicy">
           <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectItems</enum>
          </property>
          <property name="modelColumn">
           <number>0</number>
@@ -94,16 +91,16 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QPushButton" name="renameConfig">
+          <widget class="QPushButton" name="duplicateConfig">
            <property name="enabled">
             <bool>false</bool>
            </property>
            <property name="text">
-            <string>Rename</string>
+            <string>Duplicate</string>
            </property>
            <property name="icon">
             <iconset resource="../rc/icons.qrc">
-             <normaloff>:/icons/pencil.png</normaloff>:/icons/pencil.png</iconset>
+             <normaloff>:/icons/page_white_copy.png</normaloff>:/icons/page_white_copy.png</iconset>
            </property>
           </widget>
          </item>
@@ -144,18 +141,12 @@
         </widget>
        </item>
        <item>
-        <widget class="QListView" name="channels">
+        <widget class="QListView" name="channelsList">
          <property name="enabled">
           <bool>false</bool>
          </property>
          <property name="horizontalScrollBarPolicy">
           <enum>Qt::ScrollBarAlwaysOff</enum>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectRows</enum>
-         </property>
-         <property name="modelColumn">
-          <number>0</number>
          </property>
         </widget>
        </item>
@@ -187,8 +178,8 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="removeChannel">
+         <item row="1" column="1">
+          <widget class="QPushButton" name="down">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -205,11 +196,11 @@
             </size>
            </property>
            <property name="text">
-            <string>Remove</string>
+            <string>Down</string>
            </property>
            <property name="icon">
             <iconset resource="../rc/icons.qrc">
-             <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
+             <normaloff>:/icons/arrow_down.png</normaloff>:/icons/arrow_down.png</iconset>
            </property>
           </widget>
          </item>
@@ -239,8 +230,8 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
-          <widget class="QPushButton" name="down">
+         <item row="0" column="1">
+          <widget class="QPushButton" name="removeChannel">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -257,11 +248,11 @@
             </size>
            </property>
            <property name="text">
-            <string>Down</string>
+            <string>Remove</string>
            </property>
            <property name="icon">
             <iconset resource="../rc/icons.qrc">
-             <normaloff>:/icons/arrow_down.png</normaloff>:/icons/arrow_down.png</iconset>
+             <normaloff>:/icons/delete.png</normaloff>:/icons/delete.png</iconset>
            </property>
           </widget>
          </item>
@@ -455,56 +446,14 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_11">
-     <property name="bottomMargin">
-      <number>10</number>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Source:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="source">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>200</width>
-         <height>0</height>
-        </size>
-       </property>
-       <item>
-        <property name="text">
-         <string>Default Camera</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Parrot AR.Drone Front Camera</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Parrot AR.Drone Bottom Camera</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDialogButtonBox" name="buttonBox">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Save</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

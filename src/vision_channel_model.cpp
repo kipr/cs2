@@ -1,4 +1,4 @@
-#include "camera_config_model.hpp"
+#include "vision_channel_model.hpp"
 
 #include <QStandardItem>
 #include <QDebug>
@@ -66,31 +66,31 @@ private:
 	Config m_config;
 };
 
-CameraConfigModel::CameraConfigModel(QObject *parent)
+VisionChannelModel::VisionChannelModel(QObject *parent)
 	: QStandardItemModel(parent)
 {
 	setColumnCount(2);
 }
 
-CameraConfigModel::~CameraConfigModel()
+VisionChannelModel::~VisionChannelModel()
 {
 }
 
-const QString &CameraConfigModel::channelType(const QModelIndex &index) const
+const QString &VisionChannelModel::channelType(const QModelIndex &index) const
 {
 	ChannelItem *item = ChannelItem::cast(itemFromIndex(index));
 	if(!item) return m_blank;
 	return item->channelType();
 }
 
-Config CameraConfigModel::channelConfig(const QModelIndex &index) const
+Config VisionChannelModel::channelConfig(const QModelIndex &index) const
 {
 	ChannelItem *item = ChannelItem::cast(itemFromIndex(index));
 	if(!item) return Config();
 	return item->config();
 }
 
-void CameraConfigModel::setChannelConfig(const QModelIndex &index, const Config &config)
+void VisionChannelModel::setChannelConfig(const QModelIndex &index, const Config &config)
 {
 	ChannelItem *item = ChannelItem::cast(itemFromIndex(index));
 	if(!item) return;
@@ -98,48 +98,67 @@ void CameraConfigModel::setChannelConfig(const QModelIndex &index, const Config 
 	updateConfig();
 }
 
-void CameraConfigModel::setConfig(const Config &config)
+void VisionChannelModel::setConfig(const Config &config, const bool completeRefresh)
 {
-	clear();
-	m_config = config;
-	m_config.clearGroup();
-	m_config.beginGroup(CAMERA_GROUP);
-	int numChannels = m_config.intValue(CAMERA_NUM_CHANNELS_KEY);
-	for(int i = 0; i < numChannels; ++i) {
-		char buffer[32];
-		memset(buffer, 0, 32);
-		sprintf(buffer, "%s%d", CAMERA_CHANNEL_GROUP_PREFIX, i);
-		m_config.beginGroup(buffer);
-		QString type = QString::fromStdString(m_config.stringValue(CAMERA_CHANNEL_TYPE_KEY));
-		appendRow(new ChannelItem(i, type, m_config.values()));
-		m_config.endGroup();
-	}
-	m_config.endGroup();
+  if(completeRefresh) {
+    clear();
+    m_config = config;
+    m_config.clearGroup();
+    m_config.beginGroup(CAMERA_GROUP);
+    int numChannels = m_config.intValue(CAMERA_NUM_CHANNELS_KEY);
+    
+    for(int i = 0; i < numChannels; ++i) {
+      std::ostringstream group;
+      group << CAMERA_CHANNEL_GROUP_PREFIX << i;
+      m_config.beginGroup(group.str());
+      QString type = QString::fromStdString(m_config.stringValue(CAMERA_CHANNEL_TYPE_KEY));
+      appendRow(new ChannelItem(i, type, m_config.values()));
+      m_config.endGroup();
+    }
+    m_config.endGroup();
+  }
+  else {
+    m_config = config;
+    m_config.clearGroup();
+    m_config.beginGroup(CAMERA_GROUP);
+    int numChannels = m_config.intValue(CAMERA_NUM_CHANNELS_KEY);
+    for(int i = 0; i < numChannels; ++i) {
+      std::ostringstream group;
+      group << CAMERA_CHANNEL_GROUP_PREFIX << i;
+      m_config.beginGroup(group.str());
+      ChannelItem *item = ChannelItem::cast(this->item(i));
+      if(!item) continue;
+      item->setConfig(m_config.values());
+      m_config.endGroup();
+    }
+    m_config.endGroup();
+  }
 }
 
-const Config &CameraConfigModel::config() const
+const Config &VisionChannelModel::config() const
 {
 	return m_config;
 }
 
-void CameraConfigModel::addChannel(const QString &type)
+void VisionChannelModel::addChannel(const QString &type)
 {
 	appendRow(new ChannelItem(rowCount(), type));
 	updateConfig();
 }
 
-void CameraConfigModel::removeChannel(const int &i)
+void VisionChannelModel::removeChannel(const int i)
 {
-	removeRow(i);
+  int row = i;
+	removeRow(row);
 	updateConfig();
 	for(int j = i; j < rowCount(); ++j) {
-		ChannelItem *item = ChannelItem::cast(CameraConfigModel::item(j));
+		ChannelItem *item = ChannelItem::cast(VisionChannelModel::item(j));
 		if(!item) continue;
 		item->setI(item->i() - 1);
 	}
 }
 
-void CameraConfigModel::swapChannels(const int &i, const int &j)
+void VisionChannelModel::swapChannels(const int &i, const int &j)
 {
 	if(i < 0 || j < 0 || i >= rowCount() || j >= rowCount()) return;
 	int a = qMin(i, j);
@@ -155,7 +174,7 @@ void CameraConfigModel::swapChannels(const int &i, const int &j)
 	updateConfig();
 }
 
-void CameraConfigModel::updateConfig()
+void VisionChannelModel::updateConfig()
 {
 	m_config.clear();
 	m_config.beginGroup(CAMERA_GROUP);
