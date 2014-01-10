@@ -78,6 +78,7 @@ private slots:
   void resetInterface();
   void settings();
   void vision();
+  void depthSensor();
 	
 	void run(const QString &executable, const QString &id);
   void run();

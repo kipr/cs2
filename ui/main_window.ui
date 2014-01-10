@@ -114,6 +114,7 @@
     <addaction name="actionReset"/>
     <addaction name="separator"/>
     <addaction name="actionVision"/>
+    <addaction name="actionDepth_Sensor"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -906,6 +907,15 @@
    </property>
    <property name="text">
     <string>Vision</string>
+   </property>
+  </action>
+  <action name="actionDepth_Sensor">
+   <property name="icon">
+    <iconset resource="../rc/icons.qrc">
+     <normaloff>:/icons/camera.png</normaloff>:/icons/camera.png</iconset>
+   </property>
+   <property name="text">
+    <string>Depth Sensor</string>
    </property>
   </action>
  </widget>
