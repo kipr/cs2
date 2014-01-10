@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Board Selection</string>
+   <string>Set Default Board</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="margin">

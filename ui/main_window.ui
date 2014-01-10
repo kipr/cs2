@@ -239,7 +239,7 @@
            <item>
             <widget class="QPushButton" name="selectBoard">
              <property name="text">
-              <string>Select Board</string>
+              <string>Set Default Board</string>
              </property>
              <property name="icon">
               <iconset resource="../rc/icons.qrc">
