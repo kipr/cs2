@@ -75,6 +75,7 @@ private slots:
 	void textChanged(::Button::Type::Id id, const QString &text);
 	void update();
 	void reset();
+  void resetInterface();
   void settings();
   void vision();
 	

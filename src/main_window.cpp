@@ -473,10 +473,9 @@ void MainWindow::update()
 void MainWindow::run(const QString &executable, const QString &id)
 {
   stop();
+  resetInterface();
   setState(id);
-  ui->linkConsole->clear();
-  ui->console->clear();
-  
+
   m_process = new QProcess();
   QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
   // TODO: This will only work on OS X
@@ -627,7 +626,7 @@ int MainWindow::unfixPort(int port)
 
 void MainWindow::reset()
 {
-  m_buttonProvider->reset();
+  resetInterface();
   m_robot->setLeftSpeed(0.0);
   m_robot->setRightSpeed(0.0);
   m_robot->setLeftTravelDistance(0.0);
@@ -635,6 +634,11 @@ void MainWindow::reset()
   m_robot->reset();
   m_light->reset();
   m_robot->robot()[0]->setRotation(45);
+}
+
+void MainWindow::resetInterface()
+{
+  m_buttonProvider->reset();
   ui->linkConsole->clear();
   ui->console->clear();
 }
