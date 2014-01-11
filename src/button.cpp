@@ -82,6 +82,10 @@ const char *Kovan::Button::text(const ::Button::Type::Id &id) const
 
 void Kovan::Button::setPressed(const ::Button::Type::Id &id, bool pressed)
 {
+  if(id == ::Button::Type::Side) {
+    m_sim->state().t[SIDE_BUTTON] = (pressed ? 1 : 0);
+    return;
+  }
 	const unsigned char offset = buttonOffset(id);
 	if(offset > 5) return;
 	unsigned short &states = m_sim->state().t[BUTTON_STATES];

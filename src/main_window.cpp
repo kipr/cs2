@@ -125,6 +125,7 @@ MainWindow::MainWindow(State startingState, QWidget *parent)
   connect(ui->x, SIGNAL(pressed()), SLOT(buttonPressed()));
   connect(ui->y, SIGNAL(pressed()), SLOT(buttonPressed()));
   connect(ui->z, SIGNAL(pressed()), SLOT(buttonPressed()));
+  connect(ui->sideButton, SIGNAL(pressed()), SLOT(buttonPressed()));
   
   connect(ui->a, SIGNAL(released()), SLOT(buttonReleased()));
   connect(ui->b, SIGNAL(released()), SLOT(buttonReleased()));
@@ -132,6 +133,7 @@ MainWindow::MainWindow(State startingState, QWidget *parent)
   connect(ui->x, SIGNAL(released()), SLOT(buttonReleased()));
   connect(ui->y, SIGNAL(released()), SLOT(buttonReleased()));
   connect(ui->z, SIGNAL(released()), SLOT(buttonReleased()));
+  connect(ui->sideButton, SIGNAL(released()), SLOT(buttonReleased()));
   
   connect(ui->run, SIGNAL(clicked()), SLOT(run()));
   connect(ui->remove, SIGNAL(clicked()), SLOT(remove()));
@@ -234,6 +236,7 @@ void MainWindow::buttonPressed()
   else if(from == ui->x) id = ::Button::Type::X;
   else if(from == ui->y) id = ::Button::Type::Y;
   else if(from == ui->z) id = ::Button::Type::Z;
+  else if(from == ui->sideButton) id = ::Button::Type::Side;
 
   m_buttonProvider->setPressed(id, true);
 }
@@ -249,6 +252,7 @@ void MainWindow::buttonReleased()
 	else if(from == ui->x) id = ::Button::Type::X;
 	else if(from == ui->y) id = ::Button::Type::Y;
 	else if(from == ui->z) id = ::Button::Type::Z;
+  else if(from == ui->sideButton) id = ::Button::Type::Side;
 	
 	m_buttonProvider->setPressed(id, false);
 }

@@ -153,6 +153,18 @@
    <addaction name="actionZoomOut"/>
   </widget>
   <widget class="QDockWidget" name="simControls">
+   <property name="minimumSize">
+    <size>
+     <width>380</width>
+     <height>326</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>380</width>
+     <height>50026</height>
+    </size>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetMovable</set>
    </property>
@@ -168,13 +180,13 @@
    <widget class="QWidget" name="dockWidgetContents">
     <property name="minimumSize">
      <size>
-      <width>365</width>
+      <width>380</width>
       <height>300</height>
      </size>
     </property>
     <property name="maximumSize">
      <size>
-      <width>365</width>
+      <width>380</width>
       <height>50000</height>
      </size>
     </property>
@@ -189,7 +201,7 @@
       <widget class="QScrollArea" name="scrollArea">
        <property name="minimumSize">
         <size>
-         <width>365</width>
+         <width>380</width>
          <height>0</height>
         </size>
        </property>
@@ -209,9 +221,9 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
-          <width>350</width>
-          <height>712</height>
+          <y>-34</y>
+          <width>372</width>
+          <height>722</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,1">
@@ -301,6 +313,19 @@
                 </property>
                 <property name="readOnly">
                  <bool>false</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="sideButton">
+                <property name="maximumSize">
+                 <size>
+                  <width>55</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
                 </property>
                </widget>
               </item>
