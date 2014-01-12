@@ -25,7 +25,9 @@ qt5_add_resources(SOURCES ${RCS})
 
 IF(WIN32)
   INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/../prefix/include)
+  INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/../opencv/build/install/include)
   LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/../prefix/lib)
+  LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/../opencv/build/lib/Release)
 ENDIF(WIN32)
 
 IF(APPLE)
