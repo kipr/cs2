@@ -2,7 +2,7 @@
 
 void disablePowerNap()
 {
-  NSProcessInfo *info = [NSProcessInfo processInfo];
+  id info = [NSProcessInfo processInfo];
   if(![info respondsToSelector:@selector(beginActivityWithOptions:reason:)]) return;
-  [info beginActivityWithOptions:NSActivityBackground reason:@"DOWNLOAD"];
+  [info beginActivityWithOptions:0xFFULL reason:@"DOWNLOAD"];
 }
