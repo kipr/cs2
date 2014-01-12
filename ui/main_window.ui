@@ -221,7 +221,7 @@
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-34</y>
+          <y>0</y>
           <width>372</width>
           <height>722</height>
          </rect>
@@ -325,7 +325,7 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string/>
+                 <string>Side</string>
                 </property>
                </widget>
               </item>
