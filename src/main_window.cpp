@@ -85,7 +85,7 @@ MainWindow::MainWindow(State startingState, QWidget *parent)
     << tr("Right Reflectance"));
   
   _digitals->setMapping(PortConfiguration::currentDigitalMapping(), QStringList()
-    << tr("Left Touch") << tr("Right Touch"));
+    << tr("Left Touch") << tr("Right Touch"), 8);
   
   _motors = PortConfiguration::currentMotorMapping();
   
