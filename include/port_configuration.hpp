@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QStringList>
 #include <QMap>
-#include <QMetatype>
+#include <QMetaType>
 
 namespace Ui
 {
