@@ -19,6 +19,7 @@
 #include "main_window.hpp"
 
 #include <QApplication>
+#include <QTranslator>
 #include <QDir>
 #include "board_file_manager.hpp"
 #include "board_selector_dialog.hpp"
@@ -47,6 +48,10 @@ int main(int argc, char *argv[])
 #else
 	QDir::setCurrent(QApplication::applicationDirPath());
 #endif
+  
+  QTranslator translator;
+  if(translator.load("cs2_" + QLocale::system().name(), QDir::current().filePath("locale")))
+    app.installTranslator(&translator);
   
 	MainWindow mainWindow((argc > 1 && strcmp(argv[0], "-c"))
     ? MainWindow::Computer : MainWindow::Simulator);
