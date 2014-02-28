@@ -262,18 +262,38 @@ void VisionDialog::updateCamera()
 		ui->cv->setInvalid(true);
 		return;
 	}
+  
+  const int maxBlobNums = ui->numBlobs->value();
+  if(!ui->showBoundingBox->isChecked() && maxBlobNums <= 0) {
+    ui->cv->updateImage(image);
+    return;
+  }
 	
-	Camera::ObjectVector::const_iterator it = objs->begin();
-	
-	if(image.empty()) {
-		qDebug() << "Empty???";
-	}
-	
-	for(; it != objs->end(); ++it) {
+  int blobNum = 0;
+	for(Camera::ObjectVector::const_iterator it = objs->begin(); it != objs->end(); ++it) {
 		const Camera::Object &obj = *it;
-		cv::rectangle(image, cv::Rect(obj.boundingBox().x(), obj.boundingBox().y(),
-			obj.boundingBox().width(), obj.boundingBox().height()),
-			cv::Scalar(255, 0, 0), 2);
+    
+    // Draw bounding box if necessary
+    if(ui->showBoundingBox->isChecked())
+      cv::rectangle(image, cv::Rect(obj.boundingBox().x(), obj.boundingBox().y(),
+        obj.boundingBox().width(), obj.boundingBox().height()),
+        cv::Scalar(255, 0, 0), 2);
+      
+    // Draw blob number if max not exceeded
+    if(blobNum < maxBlobNums) {
+      int fontface = cv::FONT_HERSHEY_SIMPLEX;
+      double scale = 1.5;
+      int thickness = 2;
+      int baseline = 0;
+      
+      cv::Size textSize = cv::getTextSize(std::to_string(blobNum), fontface, scale, thickness, &baseline);
+      cv::Point bl(obj.boundingBox().x() + (obj.boundingBox().width() - textSize.width) / 2,
+        obj.boundingBox().y() + (obj.boundingBox().height() + textSize.height) / 2);
+      cv::rectangle(image, bl, bl + cv::Point(textSize.width, -textSize.height), cv::Scalar(0, 0, 0), CV_FILLED);
+      cv::putText(image, std::to_string(blobNum), bl, fontface, scale, cv::Scalar(255, 255, 255), thickness);
+      
+      ++blobNum;
+    }
 	}
 	
 	ui->cv->updateImage(image);
