@@ -285,12 +285,14 @@ void VisionDialog::updateCamera()
       double scale = 1.5;
       int thickness = 2;
       int baseline = 0;
+      std::stringstream blobNumStream;
+      blobNumStream << blobNum;
       
-      cv::Size textSize = cv::getTextSize(std::to_string(blobNum), fontface, scale, thickness, &baseline);
+      cv::Size textSize = cv::getTextSize(blobNumStream.str(), fontface, scale, thickness, &baseline);
       cv::Point bl(obj.boundingBox().x() + (obj.boundingBox().width() - textSize.width) / 2,
         obj.boundingBox().y() + (obj.boundingBox().height() + textSize.height) / 2);
       cv::rectangle(image, bl, bl + cv::Point(textSize.width, -textSize.height), cv::Scalar(0, 0, 0), CV_FILLED);
-      cv::putText(image, std::to_string(blobNum), bl, fontface, scale, cv::Scalar(255, 255, 255), thickness);
+      cv::putText(image, blobNumStream.str(), bl, fontface, scale, cv::Scalar(255, 255, 255), thickness);
       
       ++blobNum;
     }
