@@ -8,6 +8,8 @@
 
 #include <kovan/config.hpp>
 
+#include "cv_widget.hpp"
+
 namespace Ui
 {
 	class VisionDialog;
@@ -28,6 +30,7 @@ public:
 	VisionDialog(QWidget *parent);
 	~VisionDialog();
 	
+  void ross();
 	virtual int exec();
 	bool isDefaultPath(const QModelIndex &index) const;
 	
@@ -58,6 +61,8 @@ private:
 	
 	Ui::VisionDialog *ui;
 	QTimer m_cameraTimer;
+  
+  CvWidget *_cv;
 	
 	Camera::Device *m_device;
 	Config m_hsvConfig;

@@ -77,6 +77,7 @@ private:
 VisionDialog::VisionDialog(QWidget *parent)
 	: QDialog(parent)
 	, ui(new Ui::VisionDialog)
+  , _cv(new CvWidget())
 	, m_configsModel(new ChannelConfigurationsModel(this))
 	, m_configModel(new CameraConfigModel(this))
 	, m_device(new Camera::Device(new Camera::UsbInputProvider))
@@ -113,6 +114,7 @@ VisionDialog::VisionDialog(QWidget *parent)
 	connect(ui->visual, SIGNAL(maxChanged(QColor)), SLOT(visualChanged()));
 	
 	connect(ui->cv, SIGNAL(pressed(int, int)), SLOT(imagePressed(int, int)));
+	connect(_cv, SIGNAL(pressed(int, int)), SLOT(imagePressed(int, int)));
 	
 	connect(ui->channels->selectionModel(),
 		SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
@@ -122,11 +124,14 @@ VisionDialog::VisionDialog(QWidget *parent)
 		SIGNAL(currentChanged(QModelIndex, QModelIndex)),
 		SLOT(currentConfigChanged(QModelIndex, QModelIndex)));
 		
+  
 	m_defaultPath = m_configsModel->filePath(m_configsModel->defaultConfiguration());
 }
 
 VisionDialog::~VisionDialog()
 {
+  m_device->close();
+  delete _cv;
 	delete m_device;
 }
 
@@ -135,12 +140,14 @@ void VisionDialog::updateCamera()
 	if(!m_device->update()) {
 		qWarning() << "Lost camera";
 		ui->cv->setInvalid(true);
+		_cv->setInvalid(true);
 		return;
 	}
 
 	cv::Mat image = m_device->rawImage();
 	
 	if(!ui->hsv->isEnabled()) {
+    _cv->updateImage(image);
 		ui->cv->updateImage(image);
 		return;
 	}
@@ -149,6 +156,7 @@ void VisionDialog::updateCamera()
 	if(!objs) {
 		qWarning() << "Objects invalid";
 		ui->cv->setInvalid(true);
+		_cv->setInvalid(true);
 		return;
 	}
 	
@@ -165,13 +173,28 @@ void VisionDialog::updateCamera()
 			cv::Scalar(255, 0, 0), 2);
 	}
 	
+  _cv->updateImage(image);
 	ui->cv->updateImage(image);
+  
+}
+
+void VisionDialog::ross()
+{
+  m_device->open();
+  _cv->resize(640, 480);
+  _cv->show();
+  _cv->raise();
+  QDialog::show();
 }
 
 int VisionDialog::exec()
 {
 	if(!m_device->open()) return QDialog::Rejected;
 	
+  _cv->resize(640, 480);
+  _cv->show();
+  _cv->raise();
+  
 	int ret = QDialog::exec();
 	m_device->close();
 	

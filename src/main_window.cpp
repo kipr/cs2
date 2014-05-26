@@ -498,7 +498,7 @@ void MainWindow::run(const QString &executable, const QString &id)
 
   m_process->setProcessEnvironment(env);
   m_process->setWorkingDirectory(_workingDirectory.path());
-  connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished()));
+  connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(stop()));
 
   m_process->start(root.bin(executable).filePath(executable), QStringList());
   _processOutputBuffer->setProcess(m_process);
@@ -632,8 +632,9 @@ void MainWindow::settings()
 
 void MainWindow::vision()
 {
-  VisionDialog dialog(this);
-  if(dialog.exec() != QDialog::Accepted) return;
+  VisionDialog *dialog = new VisionDialog(0);
+  dialog->ross();
+  // if(dialog.exec() != QDialog::Accepted) return;
 }
 
 void MainWindow::setDigital(int port, bool on)
