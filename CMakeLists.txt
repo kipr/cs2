@@ -56,7 +56,7 @@ SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/deploy)
 target_link_libraries(cs2 kovanserial pcompiler kar kovan)
 
 if(WIN32)
-	target_link_libraries(cs2 opencv_core300 opencv_imgproc300)
+	target_link_libraries(cs2 opencv_core2410 opencv_imgproc2410)
 else()
 	target_link_libraries(cs2 opencv_core opencv_imgproc)
 endif()
