@@ -105,7 +105,7 @@ IF(APPLE)
 ELSE(APPLE)
 	copy_files(board "${BOARDS}" ${CMAKE_SOURCE_DIR}/deploy/)
 	copy_files(platform.hints ${RC}/platform.hints ${CMAKE_SOURCE_DIR}/deploy)
-  copy_files(translations "${QM_FILES}" ${CMAKE_SOURCE_DIR}/locale)
+  copy_files(translations "${QM_FILES}" ${CMAKE_SOURCE_DIR}/deploy/locale)
 ENDIF(APPLE)
 
 IF(APPLE)
